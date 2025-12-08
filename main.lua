@@ -135,6 +135,18 @@ function love.update(dt)
             currentGameState = gameStates.CASHOUT
             return
         end
+        -- Check if time is up
+        if timeLeft <= 0 then
+            -- Transition to cashout phase
+            currentGameState = gameStates.CASHOUT
+            return
+        end
+
+        -- Decrease time left
+        timeLeft = timeLeft - dt
+        if timeLeft < 0 then
+            timeLeft = 0
+        end
 
         -- Spawn asteroids periodically
         if #asteroids < asteroids.maxAsteroids then
@@ -361,11 +373,6 @@ function love.draw()
         -- Attach camera
         cam:attach()
 
-        -- Draw cargo capacity (middle top - current cargo / max cargo)
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.printf("Cargo: " .. spaceship.currentCargo .. " / " .. spaceship.maxCargo, 0, 10,
-            love.graphics.getWidth(), "center")
-
         -- Draw playable area (space sector)
         love.graphics.setColor(0.1, 0.1, 0.2, 0.3) -- Dark space with transparency
         love.graphics.circle("fill", playableArea.x, playableArea.y, playableArea.radius)
@@ -411,6 +418,16 @@ function love.draw()
 
         -- Detach camera
         cam:detach()
+
+        -- Draw UI elements in screen space (after detaching camera)
+        -- Draw cargo capacity (middle top - current cargo / max cargo)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.printf("Cargo: " .. spaceship.currentCargo .. " / " .. spaceship.maxCargo, 0, 10,
+            love.graphics.getWidth(), "center")
+
+        -- Draw time left (top right)
+        love.graphics.printf("Time Left: " .. math.ceil(timeLeft) .. "s", love.graphics.getWidth() - 200, 10, 200,
+            "right")
     end
 
     -- Cashout Screen (not implemented, placeholder)
