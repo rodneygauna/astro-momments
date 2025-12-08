@@ -166,6 +166,16 @@ function love.load()
 
     -- Asteroid initialization
     asteroids = {}
+    asteroids.types = {{
+        id = "debris",
+        value = 1
+    }, {
+        id = "ice",
+        value = 2
+    }, {
+        id = "iron",
+        value = 3
+    }}
     asteroids.maxAsteroids = 20
     asteroids.speed = 30
     asteroids.collectionSpeed = 50 -- Percentage per second when in field
