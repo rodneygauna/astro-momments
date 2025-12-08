@@ -1,8 +1,8 @@
-# Minnow Minutes
+# 🎣 Minnow Minutes
 
 > **Codedex 2025 Game Jam Entry**
 
-A cozy action fishing microgame where every minute counts! Catch as many fish as possible within the time limit, earn currency, and upgrade your boat to become the ultimate fisher.
+A cozy space mining microgame where every minute counts! Collect as many asteroids as possible within the time limit, earn currency, and upgrade your spaceship to become the ultimate miner.
 
 ![Game Status](https://img.shields.io/badge/status-in%20development-yellow)
 ![Love2D](https://img.shields.io/badge/LÖVE-11.5-EA316E)
@@ -10,22 +10,22 @@ A cozy action fishing microgame where every minute counts! Catch as many fish as
 
 ## 🎮 Game Overview
 
-Navigate your tiny boat through peaceful waters, catching fish with your capture ring. The longer a fish stays within your ring, the closer you are to catching it! But be careful—fish can escape if they leave your radius, and your catching ability changes as you move.
+Navigate your tiny spaceship through the depths of space, collecting asteroids with your collection field. The longer an asteroid stays within your field, the closer you are to collecting it! But be careful—asteroids can escape if they leave your radius, and your collection ability changes as you move.
 
 ### Core Gameplay Loop
 
-1. **Fish** - Navigate your boat to catch swimming fish
-2. **Earn** - Convert caught fish into currency
-3. **Upgrade** - Improve your boat's speed, radius, and capture abilities
-4. **Repeat** - Catch even more fish in the next round!
+1. **Mine** - Navigate your spaceship to collect drifting asteroids
+2. **Earn** - Convert collected asteroids into currency
+3. **Upgrade** - Improve your spaceship's speed, field radius, and collection abilities
+4. **Repeat** - Collect even more asteroids in the next round!
 
 ## ✨ Features
 
-- **Dynamic Physics-Based Movement** - Realistic boat controls with momentum and turning penalties
-- **Capture Meter System** - Progressive fish catching with visual feedback
-- **Smart Spawning** - Fish spawn dynamically with smooth ease-in animations
-- **Upgrade System** - Enhance your boat's capabilities between rounds
-- **Circular Play Area** - Navigate within a contained aquatic zone
+- **Dynamic Physics-Based Movement** - Realistic spaceship controls with momentum and turning penalties
+- **Collection Meter System** - Progressive asteroid collection with visual feedback
+- **Smart Spawning** - Asteroids spawn dynamically with smooth ease-in animations
+- **Upgrade System** - Enhance your spaceship's capabilities between rounds
+- **Circular Play Area** - Navigate within a contained space sector
 - **Camera Follow** - Smooth camera tracking for optimal gameplay
 
 ## 🕹️ How to Play
@@ -39,10 +39,10 @@ Navigate your tiny boat through peaceful waters, catching fish with your capture
 
 ### Tips
 
-- Keep fish inside your red capture ring to fill their meter
+- Keep asteroids inside your cyan collection field to fill their meter
 - Sharp turns slow you down—plan your movements!
-- Moving reduces your capture radius, so stop to catch more efficiently
-- Watch the capture meter above each fish to track your progress
+- Moving reduces your collection radius, so stop to collect more efficiently
+- Watch the collection meter above each asteroid to track your progress
 
 ## 🚀 Getting Started
 
@@ -83,10 +83,10 @@ Navigate your tiny boat through peaceful waters, catching fish with your capture
 
 ### Implemented ✅
 
-- [x] Basic boat movement with physics
-- [x] Fish spawning and AI
-- [x] Capture circle system
-- [x] Progressive capture meter
+- [x] Basic spaceship movement with physics
+- [x] Asteroid spawning and behavior
+- [x] Collection field system
+- [x] Progressive collection meter
 - [x] Circular playable area
 - [x] Dynamic spawn animations
 - [x] Camera following
@@ -100,13 +100,13 @@ Navigate your tiny boat through peaceful waters, catching fish with your capture
 
 ### Planned 📝
 
-- [ ] Multiple fish types and rarities
+- [ ] Multiple asteroid types and rarities
 - [ ] Sprites and animations
 - [ ] Sound effects and music
 - [ ] Save/load functionality
 - [ ] Particle effects
 - [ ] Polish and balancing
-- [ ] Multiple zones/levels
+- [ ] Multiple space sectors
 
 ## 📁 Project Structure
 

@@ -17,25 +17,25 @@ function love.load()
     playableArea.x = love.graphics.getWidth() / 2
     playableArea.y = love.graphics.getHeight() / 2
 
-    -- Fish initialization
-    fish = {}
-    fish.maxFish = 20
-    fish.speed = 30
-    fish.captureSpeed = 50 -- Percentage per second when in ring
-    fish.decaySpeed = 30 -- Percentage per second when out of ring
+    -- Asteroid initialization
+    asteroids = {}
+    asteroids.maxAsteroids = 20
+    asteroids.speed = 30
+    asteroids.collectionSpeed = 50 -- Percentage per second when in field
+    asteroids.decaySpeed = 30 -- Percentage per second when out of field
 
-    -- Boat initialization
-    boat = {}
-    boat.x = love.graphics.getWidth() / 2
-    boat.y = love.graphics.getHeight() / 2
-    boat.maxSpeed = 100
-    boat.acceleration = 200 -- How fast boat speeds up
-    boat.deceleration = 150 -- How fast it slows down
-    boat.velocityX = 0
-    boat.velocityY = 0
-    boat.currentSpeed = 0
-    boat.catchRadius = 100
-    boat.isMoving = false
+    -- Spaceship initialization
+    spaceship = {}
+    spaceship.x = love.graphics.getWidth() / 2
+    spaceship.y = love.graphics.getHeight() / 2
+    spaceship.maxSpeed = 100
+    spaceship.acceleration = 200 -- How fast spaceship speeds up
+    spaceship.deceleration = 150 -- How fast it slows down
+    spaceship.velocityX = 0
+    spaceship.velocityY = 0
+    spaceship.currentSpeed = 0
+    spaceship.collectionRadius = 100
+    spaceship.isMoving = false
 
     -- Camera initialization
     cam = cameraFile()
@@ -43,54 +43,54 @@ end
 
 -- Love2D update function
 function love.update(dt)
-    -- Spawn fish periodically
-    if #fish < fish.maxFish then
+    -- Spawn asteroids periodically
+    if #asteroids < asteroids.maxAsteroids then
         -- They must spawn within the playable area
         local angle = math.random() * 2 * math.pi
         local radius = math.random() * playableArea.radius
-        local fishX = playableArea.x + radius * math.cos(angle)
-        local fishY = playableArea.y + radius * math.sin(angle)
+        local asteroidX = playableArea.x + radius * math.cos(angle)
+        local asteroidY = playableArea.y + radius * math.sin(angle)
 
-        -- Calculate dynamic spawn duration based on fish count
-        -- More fish = slower spawn (0.6s), fewer fish = faster spawn (0.1s)
-        local fishRatio = #fish / fish.maxFish
-        local dynamicSpawnDuration = 0.1 + (fishRatio * 0.8) -- Range: 0.1 to 0.9 seconds
+        -- Calculate dynamic spawn duration based on asteroid count
+        -- More asteroids = slower spawn (0.9s), fewer asteroids = faster spawn (0.1s)
+        local asteroidRatio = #asteroids / asteroids.maxAsteroids
+        local dynamicSpawnDuration = 0.1 + (asteroidRatio * 0.8) -- Range: 0.1 to 0.9 seconds
 
-        table.insert(fish, {
-            x = fishX,
-            y = fishY,
+        table.insert(asteroids, {
+            x = asteroidX,
+            y = asteroidY,
             spawnTimer = 0,
             spawnDuration = dynamicSpawnDuration
         })
     end
 
-    -- Update camera position to follow the boat
-    cam:lookAt(boat.x + 15, boat.y + 15)
+    -- Update camera position to follow the spaceship
+    cam:lookAt(spaceship.x + 15, spaceship.y + 15)
 
-    -- Boat movement with velocity-based physics
-    boat.isMoving = false
+    -- Spaceship movement with velocity-based physics
+    spaceship.isMoving = false
     local inputX = 0
     local inputY = 0
 
     -- Get player input direction
     if love.keyboard.isDown("w") then
         inputY = inputY - 1
-        boat.isMoving = true
+        spaceship.isMoving = true
     end
     if love.keyboard.isDown("s") then
         inputY = inputY + 1
-        boat.isMoving = true
+        spaceship.isMoving = true
     end
     if love.keyboard.isDown("a") then
         inputX = inputX - 1
-        boat.isMoving = true
+        spaceship.isMoving = true
     end
     if love.keyboard.isDown("d") then
         inputX = inputX + 1
-        boat.isMoving = true
+        spaceship.isMoving = true
     end
 
-    if boat.isMoving then
+    if spaceship.isMoving then
         -- Normalize input direction
         local inputLength = math.sqrt(inputX * inputX + inputY * inputY)
         if inputLength > 0 then
@@ -99,13 +99,14 @@ function love.update(dt)
         end
 
         -- Calculate angle between current velocity and input direction
-        local currentVelLength = math.sqrt(boat.velocityX * boat.velocityX + boat.velocityY * boat.velocityY)
+        local currentVelLength = math.sqrt(spaceship.velocityX * spaceship.velocityX + spaceship.velocityY *
+                                               spaceship.velocityY)
         local speedMultiplier = 1.0
 
         if currentVelLength > 0.1 then
             -- Normalize current velocity
-            local currentDirX = boat.velocityX / currentVelLength
-            local currentDirY = boat.velocityY / currentVelLength
+            local currentDirX = spaceship.velocityX / currentVelLength
+            local currentDirY = spaceship.velocityY / currentVelLength
 
             -- Calculate angle difference using dot product
             local dotProduct = currentDirX * inputX + currentDirY * inputY
@@ -123,103 +124,108 @@ function love.update(dt)
         end
 
         -- Target velocity with speed multiplier
-        local targetVelX = inputX * boat.maxSpeed * speedMultiplier
-        local targetVelY = inputY * boat.maxSpeed * speedMultiplier
+        local targetVelX = inputX * spaceship.maxSpeed * speedMultiplier
+        local targetVelY = inputY * spaceship.maxSpeed * speedMultiplier
 
         -- Accelerate toward target velocity
-        local accel = boat.acceleration * dt
-        boat.velocityX = boat.velocityX + (targetVelX - boat.velocityX) * math.min(accel / boat.maxSpeed, 1)
-        boat.velocityY = boat.velocityY + (targetVelY - boat.velocityY) * math.min(accel / boat.maxSpeed, 1)
+        local accel = spaceship.acceleration * dt
+        spaceship.velocityX = spaceship.velocityX + (targetVelX - spaceship.velocityX) *
+                                  math.min(accel / spaceship.maxSpeed, 1)
+        spaceship.velocityY = spaceship.velocityY + (targetVelY - spaceship.velocityY) *
+                                  math.min(accel / spaceship.maxSpeed, 1)
     else
         -- Decelerate when no input
-        local decel = boat.deceleration * dt
-        local currentVelLength = math.sqrt(boat.velocityX * boat.velocityX + boat.velocityY * boat.velocityY)
+        local decel = spaceship.deceleration * dt
+        local currentVelLength = math.sqrt(spaceship.velocityX * spaceship.velocityX + spaceship.velocityY *
+                                               spaceship.velocityY)
 
         if currentVelLength > 0 then
             local decelAmount = math.min(decel, currentVelLength)
-            boat.velocityX = boat.velocityX * (1 - decelAmount / currentVelLength)
-            boat.velocityY = boat.velocityY * (1 - decelAmount / currentVelLength)
+            spaceship.velocityX = spaceship.velocityX * (1 - decelAmount / currentVelLength)
+            spaceship.velocityY = spaceship.velocityY * (1 - decelAmount / currentVelLength)
         end
     end
 
     -- Update current speed for reference
-    boat.currentSpeed = math.sqrt(boat.velocityX * boat.velocityX + boat.velocityY * boat.velocityY)
+    spaceship.currentSpeed = math.sqrt(spaceship.velocityX * spaceship.velocityX + spaceship.velocityY *
+                                           spaceship.velocityY)
 
     -- Apply velocity to position
-    local newX = boat.x + boat.velocityX * dt
-    local newY = boat.y + boat.velocityY * dt
+    local newX = spaceship.x + spaceship.velocityX * dt
+    local newY = spaceship.y + spaceship.velocityY * dt
 
     -- Check if new position is within circular playable area
-    local boatCenterX = newX + 15
-    local boatCenterY = newY + 15
-    local distanceFromCenter = math.sqrt((boatCenterX - playableArea.x) ^ 2 + (boatCenterY - playableArea.y) ^ 2)
+    local spaceshipCenterX = newX + 15
+    local spaceshipCenterY = newY + 15
+    local distanceFromCenter = math.sqrt((spaceshipCenterX - playableArea.x) ^ 2 + (spaceshipCenterY - playableArea.y) ^
+                                             2)
 
-    -- Keep boat within circular boundary
+    -- Keep spaceship within circular boundary
     if distanceFromCenter <= playableArea.radius then
-        boat.x = newX
-        boat.y = newY
+        spaceship.x = newX
+        spaceship.y = newY
     else
-        -- Clamp boat to edge of circle and stop velocity in that direction
-        local angle = math.atan2(boatCenterY - playableArea.y, boatCenterX - playableArea.x)
-        boat.x = playableArea.x + math.cos(angle) * playableArea.radius - 15
-        boat.y = playableArea.y + math.sin(angle) * playableArea.radius - 15
+        -- Clamp spaceship to edge of circle and stop velocity in that direction
+        local angle = math.atan2(spaceshipCenterY - playableArea.y, spaceshipCenterX - playableArea.x)
+        spaceship.x = playableArea.x + math.cos(angle) * playableArea.radius - 15
+        spaceship.y = playableArea.y + math.sin(angle) * playableArea.radius - 15
 
         -- Reduce velocity when hitting boundary
-        boat.velocityX = boat.velocityX * 0.5
-        boat.velocityY = boat.velocityY * 0.5
+        spaceship.velocityX = spaceship.velocityX * 0.5
+        spaceship.velocityY = spaceship.velocityY * 0.5
     end
 
-    -- If the boat is moving, the catching ring radius decreases to half its size over 1 second
-    if boat.isMoving then
-        boat.catchRadius = math.max(20, boat.catchRadius - 20 * dt)
+    -- If the spaceship is moving, the collection field radius decreases to half its size over 1 second
+    if spaceship.isMoving then
+        spaceship.collectionRadius = math.max(20, spaceship.collectionRadius - 20 * dt)
     else
-        boat.catchRadius = math.min(40, boat.catchRadius + 20 * dt)
+        spaceship.collectionRadius = math.min(40, spaceship.collectionRadius + 20 * dt)
     end
 
-    -- Update fish positions (move in a random direction until they hit a boundary)
-    for _, f in ipairs(fish) do
+    -- Update asteroid positions (move in a random direction until they hit a boundary)
+    for _, a in ipairs(asteroids) do
         -- Update spawn animation timer
-        if f.spawnTimer < f.spawnDuration then
-            f.spawnTimer = f.spawnTimer + dt
+        if a.spawnTimer < a.spawnDuration then
+            a.spawnTimer = a.spawnTimer + dt
         end
 
-        if not f.direction then
-            f.direction = math.random() * 2 * math.pi
+        if not a.direction then
+            a.direction = math.random() * 2 * math.pi
         end
-        local newX = f.x + math.cos(f.direction) * fish.speed * dt
-        local newY = f.y + math.sin(f.direction) * fish.speed * dt
+        local newX = a.x + math.cos(a.direction) * asteroids.speed * dt
+        local newY = a.y + math.sin(a.direction) * asteroids.speed * dt
         local distanceFromCenter = math.sqrt((newX - playableArea.x) ^ 2 + (newY - playableArea.y) ^ 2)
         if distanceFromCenter <= playableArea.radius then
-            f.x = newX
-            f.y = newY
+            a.x = newX
+            a.y = newY
         else
-            f.direction = math.random() * 2 * math.pi
+            a.direction = math.random() * 2 * math.pi
         end
     end
 
-    -- Check if fish is within the catching ring and update capture meter
-    for i = #fish, 1, -1 do
-        local f = fish[i]
-        local distance = math.sqrt((f.x - (boat.x + 15)) ^ 2 + (f.y - (boat.y + 15)) ^ 2) -- center of the boat
+    -- Check if asteroid is within the collection field and update collection meter
+    for i = #asteroids, 1, -1 do
+        local a = asteroids[i]
+        local distance = math.sqrt((a.x - (spaceship.x + 15)) ^ 2 + (a.y - (spaceship.y + 15)) ^ 2) -- center of the spaceship
 
-        -- Initialize capture meter if it doesn't exist
-        if not f.captureMeter then
-            f.captureMeter = 0
+        -- Initialize collection meter if it doesn't exist
+        if not a.collectionMeter then
+            a.collectionMeter = 0
         end
 
-        if distance < boat.catchRadius then
-            -- Fish is in ring - increase capture meter
-            f.captureMeter = f.captureMeter + fish.captureSpeed * dt
-            if f.captureMeter >= 100 then
-                f.captureMeter = 100
-                -- Fish is caught!
-                table.remove(fish, i)
+        if distance < spaceship.collectionRadius then
+            -- Asteroid is in field - increase collection meter
+            a.collectionMeter = a.collectionMeter + asteroids.collectionSpeed * dt
+            if a.collectionMeter >= 100 then
+                a.collectionMeter = 100
+                -- Asteroid is collected!
+                table.remove(asteroids, i)
             end
         else
-            -- Fish is out of ring - decrease capture meter
-            f.captureMeter = f.captureMeter - fish.decaySpeed * dt
-            if f.captureMeter < 0 then
-                f.captureMeter = 0
+            -- Asteroid is out of field - decrease collection meter
+            a.collectionMeter = a.collectionMeter - asteroids.decaySpeed * dt
+            if a.collectionMeter < 0 then
+                a.collectionMeter = 0
             end
         end
     end
@@ -230,46 +236,46 @@ function love.draw()
     -- Attach camera
     cam:attach()
 
-    -- Draw playable area
-    love.graphics.setColor(0.5, 0.5, 1, 0.3) -- Light blue with transparency
+    -- Draw playable area (space sector)
+    love.graphics.setColor(0.1, 0.1, 0.2, 0.3) -- Dark space with transparency
     love.graphics.circle("fill", playableArea.x, playableArea.y, playableArea.radius)
-    love.graphics.setColor(0, 0, 0) -- Black outline
+    love.graphics.setColor(0.5, 0.5, 0.7) -- Light gray outline
     love.graphics.circle("line", playableArea.x, playableArea.y, playableArea.radius)
 
-    -- Prototype for the ship (a square)
+    -- Prototype for the spaceship (a square)
     love.graphics.setColor(0, 1, 0) -- Green color
-    love.graphics.rectangle("fill", boat.x, boat.y, 30, 30)
+    love.graphics.rectangle("fill", spaceship.x, spaceship.y, 30, 30)
 
-    -- Prototype of the catching ring around the boat
-    love.graphics.setColor(1, 0, 0) -- Red color
-    love.graphics.circle("line", boat.x + 15, boat.y + 15, boat.catchRadius)
+    -- Prototype of the collection field around the spaceship
+    love.graphics.setColor(0, 1, 1) -- Cyan color
+    love.graphics.circle("line", spaceship.x + 15, spaceship.y + 15, spaceship.collectionRadius)
 
-    -- Draw fish
-    for _, f in ipairs(fish) do
+    -- Draw asteroids
+    for _, a in ipairs(asteroids) do
         -- Calculate spawn scale (ease in from 0 to 1)
         local spawnScale = 1
-        if f.spawnTimer < f.spawnDuration then
-            local progress = f.spawnTimer / f.spawnDuration
+        if a.spawnTimer < a.spawnDuration then
+            local progress = a.spawnTimer / a.spawnDuration
             -- Ease out cubic for smooth spawn
             spawnScale = 1 - math.pow(1 - progress, 3)
         end
 
-        love.graphics.setColor(0, 0, 1) -- Blue color
-        love.graphics.circle("fill", f.x, f.y, 10 * spawnScale)
+        love.graphics.setColor(0.6, 0.4, 0.2) -- Brown/gray color for asteroids
+        love.graphics.circle("fill", a.x, a.y, 10 * spawnScale)
 
-        -- Draw capture meter above fish if it's being caught
-        if f.captureMeter and f.captureMeter > 0 then
+        -- Draw collection meter above asteroid if it's being collected
+        if a.collectionMeter and a.collectionMeter > 0 then
             -- Background bar
             love.graphics.setColor(0.3, 0.3, 0.3)
-            love.graphics.rectangle("fill", f.x - 15, f.y - 20, 30, 5)
+            love.graphics.rectangle("fill", a.x - 15, a.y - 20, 30, 5)
 
             -- Progress bar
-            love.graphics.setColor(0, 1, 0) -- Green
-            love.graphics.rectangle("fill", f.x - 15, f.y - 20, 30 * (f.captureMeter / 100), 5)
+            love.graphics.setColor(0, 1, 1) -- Cyan
+            love.graphics.rectangle("fill", a.x - 15, a.y - 20, 30 * (a.collectionMeter / 100), 5)
 
             -- Outline
             love.graphics.setColor(1, 1, 1)
-            love.graphics.rectangle("line", f.x - 15, f.y - 20, 30, 5)
+            love.graphics.rectangle("line", a.x - 15, a.y - 20, 30, 5)
         end
     end
 
@@ -277,9 +283,3 @@ function love.draw()
     cam:detach()
 end
 
-function spawnFish()
-    local newFish = {}
-    newFish.x = math.random(0, love.graphics.getWidth())
-    newFish.y = math.random(0, love.graphics.getHeight())
-    table.insert(fish, newFish)
-end

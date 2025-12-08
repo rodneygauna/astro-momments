@@ -3,51 +3,51 @@
 ## 0. Game Summary
 
 Title: Minnow Minutes
-Genre: Action Fishing Microgame + Upgrade Loop
+Genre: Action Space Mining Microgame + Upgrade Loop
 Engine: LÖVE (Love2D)
-Theme: The player has a limited amount of time to catch as many fish as possible.
-Core Loop: Play a timed fishing round → Catch fish → Earn currency → Buy upgrades → Repeat.
+Theme: The player has a limited amount of time to mine as many asteroids as possible.
+Core Loop: Play a timed mining round → Collect asteroids → Earn currency → Buy upgrades → Repeat.
 
 ## 1. Game Loop Overview
 
 ### 1.1 Macro Loop (Between Rounds)
 
 - Player completes a timed round.
-- Fish caught convert into currency.
+- Asteroids collected convert into currency.
 - Player purchases upgrades.
-- Player begins next round or unlocks the next zone.
+- Player begins next round or unlocks the next sector.
 
 ### 1.2 Micro Loop (In-Round)
 
 - Timer begins.
-- Boat movement and fish spawning.
-- Player catches fish by keeping them inside a capture circle.
+- Spaceship movement and asteroid spawning.
+- Player collects asteroids by keeping them inside a collection field.
 - Timer ends → Round summary → Upgrade menu.
 
 ## 2. Core Systems
 
-### 2.1 Boat Movement
+### 2.1 Spaceship Movement
 
 - Player moves using WASD or Arrow Keys.
-- Speed and turn rate upgradeable.
+- Speed and maneuverability upgradeable.
 
-### 2.2 Fish AI
+### 2.2 Asteroid Behavior
 
-- Fish wander randomly.
-- Each fish has:
+- Asteroids drift randomly through space.
+- Each asteroid has:
   - Position
   - Speed
   - Value
   - Rarity
-  - Capture meter (0–100)
-- Fish spawn at intervals.
+  - Collection meter (0–100)
+- Asteroids spawn at intervals.
 
-### 2.3 Capture Circle System
+### 2.3 Collection Field System
 
-- Player boat has a circular capture radius.
-- Fish inside radius increase capture meter.
-- Fish outside radius decrease it.
-- When meter reaches 100, fish is caught.
+- Player spaceship has a circular collection field.
+- Asteroids inside field increase collection meter.
+- Asteroids outside field decrease it.
+- When meter reaches 100, asteroid is collected.
 
 ### 2.4 Timer System
 
@@ -57,31 +57,31 @@ Core Loop: Play a timed fishing round → Catch fish → Earn currency → Buy u
 
 ### 2.5 Currency System
 
-- Fish have set values.
-- Total round currency = sum of fish caught.
+- Asteroids have set values.
+- Total round currency = sum of asteroids collected.
 
 ### 2.6 Upgrades
 
 Categories:
 
-- Movement: speed, turning
-- Capture: radius, speed, decay resistance
-- Spawn: more fish, rarity chance
-- Time: extra seconds, burst mode, freeze ability
+- Movement: speed, maneuverability
+- Collection: field radius, collection speed, decay resistance
+- Spawn: more asteroids, rarity chance
+- Time: extra seconds, boost mode, time dilation ability
 
-## 3. Fishing Zones
+## 3. Space Sectors
 
-### Zone 1: Shallow Bay
+### Sector 1: Asteroid Belt
 
-- Slow, common fish.
+- Slow, common asteroids.
 
-### Zone 2: Coral Pass
+### Sector 2: Debris Field
 
-- Faster fish, more variety.
+- Faster asteroids, more variety.
 
-### Zone 3: Deepwater Rift
+### Sector 3: Deep Space
 
-- Rare high-value fish.
+- Rare high-value asteroids.
 
 ## 4. Game Flow
 
@@ -110,13 +110,13 @@ Categories:
 ### During Round
 
 - Timer
-- Fish caught counter
-- Capture circle
-- Fish sprites
+- Asteroids collected counter
+- Collection field
+- Asteroid sprites
 
 ### Round Summary
 
-- Fish caught list
+- Asteroids collected list
 - Total currency
 - Continue button
 
@@ -124,76 +124,76 @@ Categories:
 
 ### Data Structures
 
-Player:
+Spaceship:
 
 ```lua
-player = { x, y, speed, radius, captureSpeed, decaySpeed }
+spaceship = { x, y, speed, radius, collectionSpeed, decaySpeed }
 ```
 
-Fish:
+Asteroid:
 
 ```lua
-fish = { x, y, speed, value, rarity, captureMeter }
+asteroid = { x, y, speed, value, rarity, collectionMeter }
 ```
 
 Round:
 
 ```lua
-round = { timer, fishList, spawnTimer }
+round = { timer, asteroidList, spawnTimer }
 ```
 
 Upgrades:
 
 ```lua
-upgrades = { speed, radius, captureSpeed, decay, spawnRate, rareChance, timeBonus }
+upgrades = { speed, radius, collectionSpeed, decay, spawnRate, rareChance, timeBonus }
 ```
 
 ### Distance Check
 
 ```lua
-distance = math.sqrt((px - fx)^2 + (py - fy)^2)
-if distance < radius then captureMeter = captureMeter + captureSpeed * dt
-else captureMeter = captureMeter - decaySpeed * dt
+distance = math.sqrt((sx - ax)^2 + (sy - ay)^2)
+if distance < radius then collectionMeter = collectionMeter + collectionSpeed * dt
+else collectionMeter = collectionMeter - decaySpeed * dt
 ```
 
 ## 7. Audio
 
-- Gentle ocean ambience
-- Soft splash sound
-- Chime on catch
+- Ambient space atmosphere
+- Soft mining beam sound
+- Chime on collection
 
 ## 8. Art Style
 
-- Cozy, pastel ocean tones
-- Simple fish sprites
-- Soft ripple effects
+- Cozy, pastel space tones
+- Simple asteroid sprites
+- Soft particle effects
 
 ## 9. Balancing
 
-- Early: 3–5 fish per round
-- Mid: 8–12 fish
-- Late: rare fish focus
+- Early: 3–5 asteroids per round
+- Mid: 8–12 asteroids
+- Late: rare asteroid focus
 
 ## 10. Future Expansions
 
 - Power-ups
-- Boss fish
-- Weather effects
+- Boss asteroids
+- Space hazards
 - Endless mode
 
 ## 11. Game Jam MVP Scope
 
 ### Required
 
-- Boat movement
-- Fish movement
-- Capture system
+- Spaceship movement
+- Asteroid movement
+- Collection system
 - Timer
 - Summary screen
 - Upgrades
 
 ### Optional
 
-- Multiple zones
+- Multiple sectors
 - Sound
 - Animations
