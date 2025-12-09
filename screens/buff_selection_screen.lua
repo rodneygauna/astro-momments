@@ -1,0 +1,178 @@
+-- Buff Selection Screen
+-- Allows player to choose temporary buffs before starting mining rounds
+local BuffSelectionScreen = {}
+
+local Player = require("src/player")
+local Buff = require("src/buff")
+
+-- Buff selection state
+local player
+local gameStates
+local changeState
+local buffChoices
+local selectedBuffs
+local selectionsRemaining
+local maxSelections
+local hoveredButton
+
+-- Initialize buff selection screen
+function BuffSelectionScreen.load(playerData, states, stateChanger)
+    player = playerData
+    gameStates = states
+    changeState = stateChanger
+    hoveredButton = nil
+
+    -- Initialize selection state
+    maxSelections = 3
+    selectionsRemaining = maxSelections
+    selectedBuffs = {}
+
+    -- Generate initial buff choices
+    buffChoices = Buff.generateSelection(3)
+end
+
+-- Update buff selection screen
+function BuffSelectionScreen.update(dt)
+    -- Update hovered button
+    local mouseX, mouseY = love.mouse.getPosition()
+    hoveredButton = nil
+
+    -- Calculate button positions (vertical layout)
+    local buttonWidth = 500
+    local buttonHeight = 100
+    local buttonSpacing = 15
+    local totalHeight = (#buffChoices * buttonHeight) + ((#buffChoices - 1) * buttonSpacing)
+    local startY = (love.graphics.getHeight() - totalHeight) / 2
+    local buttonX = (love.graphics.getWidth() - buttonWidth) / 2
+
+    for i, buff in ipairs(buffChoices) do
+        local buttonY = startY + (i - 1) * (buttonHeight + buttonSpacing)
+
+        if mouseX >= buttonX and mouseX <= buttonX + buttonWidth and mouseY >= buttonY and mouseY <= buttonY +
+            buttonHeight then
+            hoveredButton = i
+            break
+        end
+    end
+end
+
+-- Draw buff selection screen
+function BuffSelectionScreen.draw()
+    -- Draw background
+    love.graphics.setColor(0.05, 0.05, 0.1)
+    love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+
+    -- Draw title
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.printf("SELECT A BUFF", 0, 60, love.graphics.getWidth(), "center")
+
+    -- Draw selections remaining
+    love.graphics.setColor(0.7, 0.7, 0.9)
+    love.graphics.printf("Selections Remaining: " .. selectionsRemaining .. " / " .. maxSelections, 0, 100,
+        love.graphics.getWidth(), "center")
+
+    -- Draw selected buffs count
+    if #selectedBuffs > 0 then
+        love.graphics.setColor(0.3, 0.8, 0.3)
+        love.graphics.printf("Active Buffs: " .. #selectedBuffs, 0, 130, love.graphics.getWidth(), "center")
+    end
+
+    -- Draw buff choice buttons (vertical layout)
+    local buttonWidth = 500
+    local buttonHeight = 100
+    local buttonSpacing = 15
+    local totalHeight = (#buffChoices * buttonHeight) + ((#buffChoices - 1) * buttonSpacing)
+    local startY = (love.graphics.getHeight() - totalHeight) / 2
+    local buttonX = (love.graphics.getWidth() - buttonWidth) / 2
+
+    for i, buff in ipairs(buffChoices) do
+        local buttonY = startY + (i - 1) * (buttonHeight + buttonSpacing)
+        local isHovered = (hoveredButton == i)
+
+        -- Get rarity color
+        local rarityColor = Buff.getRarityColor(buff.rarity)
+
+        -- Draw button background
+        if isHovered then
+            love.graphics.setColor(rarityColor[1] * 0.6, rarityColor[2] * 0.6, rarityColor[3] * 0.6)
+        else
+            love.graphics.setColor(rarityColor[1] * 0.4, rarityColor[2] * 0.4, rarityColor[3] * 0.4)
+        end
+        love.graphics.rectangle("fill", buttonX, buttonY, buttonWidth, buttonHeight, 10, 10)
+
+        -- Draw button border
+        love.graphics.setColor(rarityColor)
+        if isHovered then
+            love.graphics.setLineWidth(4)
+        else
+            love.graphics.setLineWidth(2)
+        end
+        love.graphics.rectangle("line", buttonX, buttonY, buttonWidth, buttonHeight, 10, 10)
+        love.graphics.setLineWidth(1)
+
+        -- Draw rarity badge
+        love.graphics.setColor(rarityColor)
+        love.graphics.print(buff.rarity:upper(), buttonX + 10, buttonY + 10)
+
+        -- Draw buff name
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.printf(buff.name, buttonX + 10, buttonY + 30, buttonWidth - 120, "left")
+
+        -- Draw buff value (on the right side)
+        local valueText = ""
+        if buff.type == "multiplier" then
+            valueText = "+" .. buff.value .. "%"
+        else
+            valueText = "+" .. buff.value
+        end
+        love.graphics.setColor(0.3, 1, 0.3)
+        love.graphics.printf(valueText, buttonX + 10, buttonY + 10, buttonWidth - 20, "right")
+
+        -- Draw buff description
+        love.graphics.setColor(0.8, 0.8, 0.8)
+        love.graphics.printf(buff.description, buttonX + 10, buttonY + 55, buttonWidth - 20, "left")
+    end
+
+    -- Draw instructions
+    love.graphics.setColor(0.7, 0.7, 0.7)
+    love.graphics.printf("Click a buff to select it", 0, love.graphics.getHeight() - 60, love.graphics.getWidth(),
+        "center")
+end
+
+-- Handle keyboard input
+function BuffSelectionScreen.keypressed(key)
+    -- Allow ESC to go back to menu (only if no selections made yet)
+    if key == "escape" and #selectedBuffs == 0 then
+        changeState(gameStates.MENU)
+    end
+end
+
+-- Handle mouse input
+function BuffSelectionScreen.mousepressed(x, y, button)
+    if button == 1 and hoveredButton then
+        local selectedBuff = buffChoices[hoveredButton]
+
+        -- Add buff to selected buffs list
+        table.insert(selectedBuffs, selectedBuff)
+
+        -- Decrease selections remaining
+        selectionsRemaining = selectionsRemaining - 1
+
+        -- Check if all selections are made
+        if selectionsRemaining <= 0 then
+            -- Store selected buffs in player data for later application
+            player.activeBuffs = selectedBuffs
+
+            -- Reset fuel for the new run
+            Player.resetFuel(player)
+
+            -- Move to map selection
+            changeState(gameStates.MAP_SELECTION)
+        else
+            -- Generate new buff choices for next selection
+            buffChoices = Buff.generateSelection(3)
+        end
+    end
+end
+
+return BuffSelectionScreen

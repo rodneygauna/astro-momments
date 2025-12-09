@@ -1,0 +1,181 @@
+-- Cashout Screen
+-- Displays collected materials and calculates earnings
+local CashoutScreen = {}
+
+local Player = require("src/player")
+
+-- Cashout state
+local player
+local gameStates
+local changeState
+local sectorName
+local collectedMaterials
+local cargoUsed
+local cargoMax
+local totalValue
+local hasProcessedReward
+local baseValue -- Value before multiplier
+local valueMultiplier -- Multiplier from buffs
+
+-- Initialize cashout screen
+function CashoutScreen.load(playerData, states, stateChanger, sector, cargo)
+    player = playerData
+    gameStates = states
+    changeState = stateChanger
+    sectorName = sector.name
+    cargoUsed = cargo.used
+    cargoMax = cargo.max
+    hasProcessedReward = false
+
+    -- Process collected materials
+    collectedMaterials = {}
+    totalValue = 0
+    baseValue = 0
+
+    -- Count each material type
+    for _, asteroid in ipairs(cargo.items) do
+        local typeId = asteroid.asteroidType.id
+        local typeValue = asteroid.asteroidType.value
+
+        if not collectedMaterials[typeId] then
+            collectedMaterials[typeId] = {
+                id = typeId,
+                quantity = 0,
+                value = typeValue,
+                total = 0
+            }
+        end
+
+        collectedMaterials[typeId].quantity = collectedMaterials[typeId].quantity + 1
+        collectedMaterials[typeId].total = collectedMaterials[typeId].quantity * typeValue
+        baseValue = baseValue + typeValue
+    end
+
+    -- Apply value multiplier from buffs if active
+    valueMultiplier = cargo.valueMultiplier or 1.0
+    totalValue = math.floor(baseValue * valueMultiplier)
+
+    -- Award gold to player
+    Player.addGold(player, totalValue)
+    hasProcessedReward = true
+end
+
+-- Update cashout screen
+function CashoutScreen.update(dt)
+    -- Nothing to update
+end
+
+-- Draw cashout screen
+function CashoutScreen.draw()
+    -- Draw semi-transparent overlay
+    love.graphics.setColor(0, 0, 0, 0.85)
+    love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+
+    -- Draw panel background
+    local panelWidth = 600
+    local panelHeight = 500
+    local panelX = (love.graphics.getWidth() - panelWidth) / 2
+    local panelY = (love.graphics.getHeight() - panelHeight) / 2
+
+    love.graphics.setColor(0.15, 0.15, 0.2, 0.95)
+    love.graphics.rectangle("fill", panelX, panelY, panelWidth, panelHeight, 10, 10)
+
+    -- Draw border
+    love.graphics.setColor(0.5, 0.5, 0.7)
+    love.graphics.setLineWidth(3)
+    love.graphics.rectangle("line", panelX, panelY, panelWidth, panelHeight, 10, 10)
+    love.graphics.setLineWidth(1)
+
+    -- Draw title
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.printf("CASHOUT", panelX, panelY + 20, panelWidth, "center")
+
+    -- Draw sector name
+    love.graphics.setColor(0.7, 0.7, 0.9)
+    love.graphics.printf(sectorName, panelX, panelY + 50, panelWidth, "center")
+
+    -- Draw cargo info
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.printf("Cargo: " .. cargoUsed .. " / " .. cargoMax, panelX, panelY + 80, panelWidth, "center")
+
+    -- Draw separator line
+    love.graphics.setColor(0.5, 0.5, 0.7)
+    love.graphics.line(panelX + 50, panelY + 110, panelX + panelWidth - 50, panelY + 110)
+
+    -- Draw materials header
+    love.graphics.setColor(0.8, 0.8, 0.8)
+    local headerY = panelY + 130
+    love.graphics.printf("Material", panelX + 50, headerY, 200, "left")
+    love.graphics.printf("Qty", panelX + 250, headerY, 80, "center")
+    love.graphics.printf("Value", panelX + 330, headerY, 80, "center")
+    love.graphics.printf("Total", panelX + 410, headerY, 100, "right")
+
+    -- Draw materials list
+    love.graphics.setColor(1, 1, 1)
+    local currentY = headerY + 30
+    local lineHeight = 25
+
+    for materialId, data in pairs(collectedMaterials) do
+        -- Format material name (replace underscores with spaces, capitalize first letter)
+        local displayName = materialId:gsub("_", " "):gsub("^%l", string.upper)
+
+        love.graphics.printf(displayName, panelX + 50, currentY, 200, "left")
+        love.graphics.printf(tostring(data.quantity), panelX + 250, currentY, 80, "center")
+        love.graphics.printf(tostring(data.value), panelX + 330, currentY, 80, "center")
+        love.graphics.printf(tostring(data.total), panelX + 410, currentY, 100, "right")
+
+        currentY = currentY + lineHeight
+    end
+
+    -- Draw separator line before total
+    love.graphics.setColor(0.5, 0.5, 0.7)
+    love.graphics.line(panelX + 50, panelY + panelHeight - 120, panelX + panelWidth - 50, panelY + panelHeight - 120)
+
+    -- Draw base value if multiplier is active
+    if valueMultiplier > 1.0 then
+        love.graphics.setColor(0.7, 0.7, 0.7)
+        love.graphics.printf("Base Value:", panelX + 50, panelY + panelHeight - 100, 300, "left")
+        love.graphics.printf(tostring(baseValue) .. " Gold", panelX + 350, panelY + panelHeight - 100, 200, "right")
+
+        -- Draw multiplier
+        love.graphics.setColor(0.3, 1, 0.3)
+        love.graphics.printf("Value Buff:", panelX + 50, panelY + panelHeight - 80, 300, "left")
+        love.graphics.printf("x" .. string.format("%.2f", valueMultiplier), panelX + 350, panelY + panelHeight - 80,
+            200, "right")
+
+        -- Draw another separator
+        love.graphics.setColor(0.5, 0.5, 0.7)
+        love.graphics.line(panelX + 50, panelY + panelHeight - 65, panelX + panelWidth - 50, panelY + panelHeight - 65)
+    end
+
+    -- Draw total value
+    love.graphics.setColor(1, 0.8, 0)
+    local totalY = valueMultiplier > 1.0 and (panelY + panelHeight - 50) or (panelY + panelHeight - 80)
+    love.graphics.printf("TOTAL EARNED:", panelX + 50, totalY, 300, "left")
+    love.graphics.printf(tostring(totalValue) .. " Gold", panelX + 350, totalY, 200, "right")
+
+    -- Draw continue prompt
+    love.graphics.setColor(0.7, 0.7, 0.7)
+    love.graphics.printf("Press SPACE or ENTER to continue", panelX, panelY + panelHeight - 40, panelWidth, "center")
+end
+
+-- Handle keyboard input
+function CashoutScreen.keypressed(key)
+    if key == "space" or key == "return" then
+        -- Check if player has fuel to continue mining
+        if player.currency.fuel > 0 then
+            changeState(gameStates.MAP_SELECTION)
+        else
+            -- Out of fuel, clear active buffs and return to menu
+            player.activeBuffs = nil
+            changeState(gameStates.MENU)
+        end
+    end
+end
+
+-- Handle mouse input
+function CashoutScreen.mousepressed(x, y, button)
+    -- Optional: could add a continue button here
+end
+
+return CashoutScreen
