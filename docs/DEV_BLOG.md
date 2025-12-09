@@ -73,7 +73,7 @@ I didn't spend much time on the game today because it's the weekend and that tim
 
 ## Day 4 (December 8, 2025)
 
-**Drinks Consumed:** 1 Starbucks Iced Shaken Espresso, 1 Iced Milk Tea, 1 Michelada (Modelo Especial)
+**Drinks Consumed:** 1 Starbucks Iced Shaken Espresso, 1 Starbucks Matcha Latte, 1 Iced Milk Tea, 1 Michelada (Modelo Especial)
 
 Big decision. Yesterday, I realized that I was recreating [Far Fishing](https://store.steampowered.com/app/3723470/Far_Fishing/) a bit too closely. While I love that game, I want to make sure that my game has its own unique identity. So, I decided to pivot the game's theme from fishing to space exploration. The core mechanics will remain similar, but instead of collecting fish, the player will be collecting space debris and resources.
 
@@ -89,6 +89,18 @@ I started working on game states, adding a menu screen and placeholders for othe
 ![Game State Video](screenshots/Day04.gif)
 
 I also added some more variables to the ship, such as cargo capacity and fuel (this will act as the travel currency).
+
+Tons of progress on the random buff selection screen. The player can now choose from three random buffs before starting a new mission. Each buff has a name, description, and value. Once a buff is selected, it's applied to the player's ship for the duration of the mission (until their fuel runs out).
+
+![Buff Selection Screenshot](screenshots/buffs.gif)
+
+Also, I implemented the Map Selection screen. The player can now choose from different maps to explore, each with its own rewards. The maps are unlocked based on the player's progress, providing a sense of progression and accomplishment.
+
+![Map Selection Screenshot](screenshots/sectors.gif)
+
+To end the night, I worked on the Cashout screen. After completing a mission, the player can cash out their collected resources for gold. The total value is calculated based on the types and quantities of resources collected, as well as any active buffs that may increase the value. Once cashed out, the player can use their gold to purchase upgrades and unlock new maps.
+
+![Cashout Screenshot](screenshots/cashout.gif)
 
 Additionally, I started breaking my code up into modules to improve organization and maintainability. This will make it easier to manage the codebase as the project grows. I saw this example in Challacade's course and thought it was a good idea; I just took it to the next level from my previous experience doing web development.
 
