@@ -87,7 +87,7 @@ function MenuScreen.draw()
     love.graphics.setColor(1, 1, 1)
     local titleFont = love.graphics.newFont(48)
     love.graphics.setFont(titleFont)
-    love.graphics.printf("Astro Momments", 0, 100, love.graphics.getWidth(), "center")
+    love.graphics.printf("Astro Moments", 0, 100, love.graphics.getWidth(), "center")
 
     -- Reset to default font for buttons
     love.graphics.setFont(love.graphics.newFont(20))
