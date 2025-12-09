@@ -25,8 +25,8 @@ Buff.definitions = {{
     name = "Increased Collection Radius",
     description = "Increases the collection field radius by a percentage.",
     type = "multiplier",
-    minValue = 25,
-    maxValue = 75,
+    minValue = 20,
+    maxValue = 80,
     rarity = "uncommon"
 }, {
     id = "max_speed_boost",
@@ -45,19 +45,11 @@ Buff.definitions = {{
     maxValue = 100,
     rarity = "uncommon"
 }, {
-    id = "max_cargo_capacity",
-    name = "Extra Cargo Space",
-    description = "Increases the spaceship's maximum cargo capacity by a flat amount.",
-    type = "flat",
-    minValue = 1,
-    maxValue = 3,
-    rarity = "rare"
-}, {
     id = "value_boost",
     name = "Value Boost",
     description = "Increases the value of collected asteroids by a multiplier (e.g., 1.5x).",
     type = "multiplier",
-    minValue = 25,
+    minValue = 20,
     maxValue = 100,
     rarity = "rare"
 }, {
@@ -115,6 +107,9 @@ function Buff.generateRandom()
 
     -- Generate a random value within the buff's range
     local value = math.random(selectedBuff.minValue, selectedBuff.maxValue)
+
+    -- Round up to the nearest ten
+    value = math.ceil(value / 10) * 10
 
     -- Create a buff instance
     return {
