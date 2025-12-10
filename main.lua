@@ -8,6 +8,7 @@ local MiningScreen = require("screens/mining_screen")
 local CashoutScreen = require("screens/cashout_screen")
 local MapScreen = require("screens/map_screen")
 local BuffSelectionScreen = require("screens/buff_selection_screen")
+local UpgradeScreen = require("screens/upgrade_screen")
 local cameraFile = require("libs/hump/camera")
 
 -- Global game state
@@ -57,8 +58,8 @@ local function changeGameState(newState, ...)
         -- TODO: Load credits screen
         currentScreen = nil
     elseif newState == gameStates.SKILL_TREE then
-        -- TODO: Load skill tree screen
-        currentScreen = nil
+        UpgradeScreen.load(player, gameStates, changeGameState)
+        currentScreen = UpgradeScreen
     elseif newState == gameStates.ROUND_START_BUFF_SELECTION then
         BuffSelectionScreen.load(player, gameStates, changeGameState)
         currentScreen = BuffSelectionScreen

@@ -146,15 +146,17 @@ function Buff.apply(buff, spaceship, gameState)
         -- Increase collection radius by percentage
         local radiusIncrease = spaceship.baseCollectionRadius * (buff.value / 100)
         spaceship.collectionRadius = spaceship.collectionRadius + radiusIncrease
+        spaceship.baseCollectionRadius = spaceship.baseCollectionRadius + radiusIncrease
+        spaceship.minCollectionRadius = spaceship.minCollectionRadius + radiusIncrease
+        spaceship.maxCollectionRadius = spaceship.maxCollectionRadius + radiusIncrease
     elseif buff.id == "max_speed_boost" then
         -- Increase max speed
         spaceship.maxSpeed = spaceship.maxSpeed + buff.value
     elseif buff.id == "acceleration_boost" then
         -- Increase acceleration
         spaceship.acceleration = spaceship.acceleration + buff.value
-    elseif buff.id == "max_cargo_capacity" then
-        -- Increase cargo capacity
-        spaceship.maxCargo = spaceship.maxCargo + buff.value
+        -- Also increase deceleration proportionally to maintain control
+        spaceship.deceleration = spaceship.deceleration + (buff.value * 0.75)
     elseif buff.id == "value_boost" then
         -- Store value multiplier for cashout calculation
         gameState.valueMultiplier = (gameState.valueMultiplier or 1.0) + (buff.value / 100)

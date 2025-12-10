@@ -16,6 +16,7 @@ local totalValue
 local hasProcessedReward
 local baseValue -- Value before multiplier
 local valueMultiplier -- Multiplier from buffs
+local goldMultiplier -- Multiplier from upgrades
 
 -- Initialize cashout screen
 function CashoutScreen.load(playerData, states, stateChanger, sector, cargo)
@@ -53,7 +54,10 @@ function CashoutScreen.load(playerData, states, stateChanger, sector, cargo)
 
     -- Apply value multiplier from buffs if active
     valueMultiplier = cargo.valueMultiplier or 1.0
-    totalValue = math.floor(baseValue * valueMultiplier)
+
+    -- Apply gold multiplier from upgrades
+    goldMultiplier = 1.0 + ((player.stats.goldMultiplier or 0) / 100)
+    totalValue = math.floor(baseValue * valueMultiplier * goldMultiplier)
 
     -- Award gold to player
     Player.addGold(player, totalValue)
@@ -129,30 +133,44 @@ function CashoutScreen.draw()
 
     -- Draw separator line before total
     love.graphics.setColor(0.5, 0.5, 0.7)
-    love.graphics.line(panelX + 50, panelY + panelHeight - 120, panelX + panelWidth - 50, panelY + panelHeight - 120)
+    love.graphics.line(panelX + 50, panelY + panelHeight - 140, panelX + panelWidth - 50, panelY + panelHeight - 140)
 
-    -- Draw base value if multiplier is active
-    if valueMultiplier > 1.0 then
+    -- Track current Y position for dynamic layout
+    local multiplierY = panelY + panelHeight - 120
+
+    -- Always show base value if any multipliers are active
+    if valueMultiplier > 1.0 or goldMultiplier > 1.0 then
         love.graphics.setColor(0.7, 0.7, 0.7)
-        love.graphics.printf("Base Value:", panelX + 50, panelY + panelHeight - 100, 300, "left")
-        love.graphics.printf(tostring(baseValue) .. " Gold", panelX + 350, panelY + panelHeight - 100, 200, "right")
+        love.graphics.printf("Base Value:", panelX + 50, multiplierY, 300, "left")
+        love.graphics.printf(tostring(baseValue) .. " Gold", panelX + 350, multiplierY, 200, "right")
+        multiplierY = multiplierY + 20
 
-        -- Draw multiplier
-        love.graphics.setColor(0.3, 1, 0.3)
-        love.graphics.printf("Value Buff:", panelX + 50, panelY + panelHeight - 80, 300, "left")
-        love.graphics.printf("x" .. string.format("%.2f", valueMultiplier), panelX + 350, panelY + panelHeight - 80,
-            200, "right")
+        -- Draw buff multiplier if active
+        if valueMultiplier > 1.0 then
+            love.graphics.setColor(0.3, 1, 0.3)
+            love.graphics.printf("Value Buff:", panelX + 50, multiplierY, 300, "left")
+            love.graphics.printf("x" .. string.format("%.2f", valueMultiplier), panelX + 350, multiplierY, 200, "right")
+            multiplierY = multiplierY + 20
+        end
+
+        -- Draw upgrade multiplier if active
+        if goldMultiplier > 1.0 then
+            love.graphics.setColor(1, 0.8, 0.3)
+            love.graphics.printf("Cashout Upgrade:", panelX + 50, multiplierY, 300, "left")
+            love.graphics.printf("x" .. string.format("%.2f", goldMultiplier), panelX + 350, multiplierY, 200, "right")
+            multiplierY = multiplierY + 20
+        end
 
         -- Draw another separator
         love.graphics.setColor(0.5, 0.5, 0.7)
-        love.graphics.line(panelX + 50, panelY + panelHeight - 65, panelX + panelWidth - 50, panelY + panelHeight - 65)
+        love.graphics.line(panelX + 50, multiplierY + 5, panelX + panelWidth - 50, multiplierY + 5)
+        multiplierY = multiplierY + 15
     end
 
     -- Draw total value
     love.graphics.setColor(1, 0.8, 0)
-    local totalY = valueMultiplier > 1.0 and (panelY + panelHeight - 50) or (panelY + panelHeight - 80)
-    love.graphics.printf("TOTAL EARNED:", panelX + 50, totalY, 300, "left")
-    love.graphics.printf(tostring(totalValue) .. " Gold", panelX + 350, totalY, 200, "right")
+    love.graphics.printf("TOTAL EARNED:", panelX + 50, multiplierY, 300, "left")
+    love.graphics.printf(tostring(totalValue) .. " Gold", panelX + 350, multiplierY, 200, "right")
 
     -- Draw continue prompt
     love.graphics.setColor(0.7, 0.7, 0.7)

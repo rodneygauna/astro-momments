@@ -14,6 +14,7 @@ local asteroids
 local playableArea
 local timeLeft
 local maxTime
+local maxAsteroidsAllowed
 local player
 local gameStates
 local changeState
@@ -42,7 +43,7 @@ function MiningScreen.load(camera, playerData, states, stateChanger, sectorId)
     gameStates = states
     changeState = stateChanger
     currentSector = Sector.definitions[sectorId] or Sector.definitions["sector_01"]
-    maxTime = 30 -- Maximum time for mining phase in seconds
+    maxTime = 30 + (player.stats.missionTimeBonus or 0) -- Base time + mission time bonus
     timeLeft = maxTime
 
     -- Set the playable area size (circle)
@@ -54,6 +55,10 @@ function MiningScreen.load(camera, playerData, states, stateChanger, sectorId)
 
     -- Initialize spaceship
     spaceship = Spaceship.new(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2, player)
+
+    -- Calculate max asteroids with spawn rate bonus
+    local spawnRateBonus = (player.stats.spawnRateBonus or 0) / 100
+    maxAsteroidsAllowed = math.floor(Asteroid.maxAsteroids * (1 + spawnRateBonus))
 
     -- Initialize game state for buffs
     gameState = {
@@ -114,7 +119,7 @@ function MiningScreen.update(dt)
     end
 
     -- Spawn asteroids periodically
-    if #asteroids < Asteroid.maxAsteroids then
+    if #asteroids < maxAsteroidsAllowed then
         local allowedTypes = getSectorAsteroidTypes()
         table.insert(asteroids, Asteroid.spawn(playableArea, #asteroids, allowedTypes))
     end
@@ -127,7 +132,7 @@ function MiningScreen.update(dt)
     Spaceship.update(spaceship, dt, playableArea)
 
     -- Update all asteroids
-    Asteroid.updateAll(asteroids, dt, playableArea, spaceship)
+    Asteroid.updateAll(asteroids, dt, playableArea, spaceship, player.stats)
 end
 
 -- Draw mining screen

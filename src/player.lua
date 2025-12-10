@@ -8,7 +8,7 @@ function Player.new()
         name = "Captain", -- Player's name
         shipName = "Starfarer", -- Ship's name
         currency = {
-            gold = 0, -- Mining currency earned from collecting asteroids
+            gold = 50000000, -- Mining currency earned from collecting asteroids (starting with 500 for testing)
             fuel = 5 -- Fuel currency for traveling to sectors/maps
         },
         skills = {
@@ -17,10 +17,17 @@ function Player.new()
         },
         stats = {
             -- Permanent stat upgrades from skill tree
-            collectionSpeedBonus = 0, -- Percentage bonus
-            cargoCapacityBonus = 0, -- Flat bonus
             movementSpeedBonus = 0, -- Percentage bonus
-            fuelEfficiency = 0 -- Reduces fuel cost per mission
+            accelerationBonus = 0, -- Percentage bonus
+            collectionRadiusBonus = 0, -- Flat bonus
+            collectionSpeedBonus = 0, -- Percentage bonus
+            decayReduction = 0, -- Percentage bonus
+            autoCollectThreshold = nil, -- Threshold percentage
+            cargoCapacityBonus = 0, -- Flat bonus
+            goldMultiplier = 0, -- Percentage bonus
+            missionTimeBonus = 0, -- Flat bonus (seconds)
+            fuelEfficiency = 0, -- Percentage bonus
+            spawnRateBonus = 0 -- Percentage bonus
         },
         progress = {
             unlockedMaps = {"sector_01"}, -- List of unlocked map/sector IDs

@@ -4,19 +4,23 @@ local Spaceship = {}
 
 -- Create a new spaceship
 function Spaceship.new(x, y, player)
+    local baseCollectionRadius = 100 + (player.stats.collectionRadiusBonus or 0)
+    local baseAcceleration = 200 + (200 * (player.stats.accelerationBonus or 0) / 100)
+    local baseDeceleration = 150 + (150 * (player.stats.accelerationBonus or 0) / 100)
+
     return {
         x = x,
         y = y,
         maxSpeed = 100 + (100 * player.stats.movementSpeedBonus / 100), -- Base speed + bonus
-        acceleration = 200, -- How fast spaceship speeds up
-        deceleration = 150, -- How fast it slows down
+        acceleration = baseAcceleration, -- Base acceleration + bonus
+        deceleration = baseDeceleration, -- Base deceleration + bonus (same as acceleration)
         velocityX = 0,
         velocityY = 0,
         currentSpeed = 0,
-        collectionRadius = 100,
-        baseCollectionRadius = 100, -- Store base value for resets
-        minCollectionRadius = 20, -- Minimum when moving
-        maxCollectionRadius = 40, -- Maximum when stationary
+        collectionRadius = baseCollectionRadius,
+        baseCollectionRadius = baseCollectionRadius, -- Store base value for resets
+        minCollectionRadius = 20 + (player.stats.collectionRadiusBonus or 0), -- Minimum when moving
+        maxCollectionRadius = 40 + (player.stats.collectionRadiusBonus or 0), -- Maximum when stationary
         isMoving = false,
         maxCargo = 5 + player.stats.cargoCapacityBonus, -- Base cargo + bonus from skills
         currentCargo = 0,

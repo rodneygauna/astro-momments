@@ -128,19 +128,39 @@ function Asteroid.update(asteroid, dt, playableArea)
 end
 
 -- Update asteroid collection meter
-function Asteroid.updateCollection(asteroid, dt, spaceshipCenterX, spaceshipCenterY, collectionRadius)
+function Asteroid.updateCollection(asteroid, dt, spaceshipCenterX, spaceshipCenterY, collectionRadius, playerStats,
+    spaceship)
     local distance = math.sqrt((asteroid.x - spaceshipCenterX) ^ 2 + (asteroid.y - spaceshipCenterY) ^ 2)
+
+    -- Calculate collection speed with bonus from both upgrades and buffs
+    local upgradeCollectionBonus = (playerStats and playerStats.collectionSpeedBonus) or 0
+    local buffCollectionBonus = (spaceship and spaceship.collectionSpeedBonus) or 0
+    local totalCollectionBonus = upgradeCollectionBonus + buffCollectionBonus
+    local effectiveCollectionSpeed = Asteroid.collectionSpeed * (1 + totalCollectionBonus / 100)
+
+    -- Calculate decay speed with resistance from both upgrades and buffs
+    local upgradeDecayReduction = (playerStats and playerStats.decayReduction) or 0
+    local buffDecayReduction = (spaceship and spaceship.decaySpeedReduction) or 0
+    local totalDecayReduction = upgradeDecayReduction + buffDecayReduction
+    local effectiveDecaySpeed = Asteroid.decaySpeed * (1 - totalDecayReduction / 100)
+
+    -- Check for auto-collect threshold
+    local autoCollectThreshold = (playerStats and playerStats.autoCollectThreshold) or nil
+    if autoCollectThreshold and asteroid.collectionMeter >= autoCollectThreshold then
+        asteroid.collectionMeter = 100
+        return true -- Auto-collected!
+    end
 
     if distance < collectionRadius then
         -- Asteroid is in field - increase collection meter
-        asteroid.collectionMeter = asteroid.collectionMeter + Asteroid.collectionSpeed * dt
+        asteroid.collectionMeter = asteroid.collectionMeter + effectiveCollectionSpeed * dt
         if asteroid.collectionMeter >= 100 then
             asteroid.collectionMeter = 100
             return true -- Asteroid is collected!
         end
     else
         -- Asteroid is out of field - decrease collection meter
-        asteroid.collectionMeter = asteroid.collectionMeter - Asteroid.decaySpeed * dt
+        asteroid.collectionMeter = asteroid.collectionMeter - effectiveDecaySpeed * dt
         if asteroid.collectionMeter < 0 then
             asteroid.collectionMeter = 0
         end
@@ -179,7 +199,7 @@ function Asteroid.draw(asteroid)
 end
 
 -- Update all asteroids in a list
-function Asteroid.updateAll(asteroids, dt, playableArea, spaceship)
+function Asteroid.updateAll(asteroids, dt, playableArea, spaceship, playerStats)
     -- Update positions
     for _, asteroid in ipairs(asteroids) do
         Asteroid.update(asteroid, dt, playableArea)
@@ -189,7 +209,7 @@ function Asteroid.updateAll(asteroids, dt, playableArea, spaceship)
     local spaceshipCenterX, spaceshipCenterY = spaceship.x + 15, spaceship.y + 15
     for i = #asteroids, 1, -1 do
         local collected = Asteroid.updateCollection(asteroids[i], dt, spaceshipCenterX, spaceshipCenterY,
-            spaceship.collectionRadius)
+            spaceship.collectionRadius, playerStats, spaceship)
         if collected then
             -- Store the collected asteroid data
             table.insert(spaceship.collectedAsteroids, asteroids[i])
