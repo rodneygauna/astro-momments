@@ -2,6 +2,8 @@
 -- Handles main menu display and interaction
 local MenuScreen = {}
 
+local Save = require("src.save")
+
 -- Menu state
 local menu = {}
 local backgroundImage
@@ -33,7 +35,7 @@ function MenuScreen.load(gameStates, changeState)
     menu.buttons = {{
         text = "Continue",
         action = "continue",
-        enabled = false -- Will be enabled when save file exists
+        enabled = Save.exists() -- Enable if save file exists
     }, {
         text = "New Game",
         action = "new_game",
@@ -51,7 +53,16 @@ function MenuScreen.load(gameStates, changeState)
         action = "exit",
         enabled = true
     }}
-    menu.selectedIndex = 2 -- Start with "New Game" selected (first enabled button)
+
+    -- Start with first enabled button selected
+    menu.selectedIndex = 1
+    for i, button in ipairs(menu.buttons) do
+        if button.enabled then
+            menu.selectedIndex = i
+            break
+        end
+    end
+
     menu.buttonHeight = 50
     menu.buttonWidth = 200
     menu.buttonSpacing = 10
@@ -68,7 +79,15 @@ local function handleMenuAction(action)
 
     if action == "continue" then
         -- Load save file and continue
-        menu.changeState(menu.gameStates.SKILL_TREE)
+        local player, error = Save.read()
+        if player then
+            -- Successfully loaded, go to map selection with loaded player
+            menu.changeState(menu.gameStates.MAP_SELECTION, player)
+        else
+            -- Failed to load save
+            print("Failed to load save file:", error)
+            -- Could show error message to user here
+        end
     elseif action == "new_game" then
         -- Reset player progress and start new game
         menu.changeState(menu.gameStates.ROUND_START_BUFF_SELECTION)

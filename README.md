@@ -67,7 +67,25 @@ Navigate your tiny spaceship through the depths of space, collecting asteroids w
 
    Or drag the folder onto the LÖVE executable.
 
-## 🛠️ Built With
+## � Save Files
+
+Your game progress is automatically saved when you:
+
+- Complete a mining run and earn currency
+- Purchase upgrades
+- Unlock new sectors
+
+### Save File Location
+
+Astro Moments uses LÖVE's filesystem, which stores save files in platform-specific directories:
+
+- **Linux**: `~/.local/share/love/astro-moments/player_save.json`
+- **Windows**: `%APPDATA%/LOVE/astro-moments/player_save.json`
+- **macOS**: `~/Library/Application Support/LOVE/astro-moments/player_save.json`
+
+The save file is in JSON format, making it human-readable and easy to backup or transfer between systems.
+
+## �🛠️ Built With
 
 ### Core Technologies
 
@@ -78,6 +96,7 @@ Navigate your tiny spaceship through the depths of space, collecting asteroids w
 ### Libraries
 
 - **[HUMP](https://github.com/vrld/hump)** - Camera system and helper utilities
+- **[dkjson](https://github.com/LuaDist/dkjson)** - JSON encoding and decoding
 
 ## 📋 Development Roadmap
 
@@ -103,7 +122,7 @@ Navigate your tiny spaceship through the depths of space, collecting asteroids w
 - [ ] Multiple asteroid types and rarities
 - [ ] Sprites and animations
 - [ ] Sound effects and music
-- [ ] Save/load functionality
+- [x] Save/load functionality
 - [ ] Particle effects
 - [ ] Polish and balancing
 - [ ] Multiple space sectors

@@ -4,6 +4,7 @@ local MapScreen = {}
 
 local Player = require("src/player")
 local Sector = require("src/sector")
+local Save = require("src/save")
 
 -- Map screen state
 local player
@@ -293,6 +294,12 @@ function MapScreen.keypressed(key)
                 -- Refresh button state
                 btn.isUnlocked = true
                 btn.canAfford = Player.canAfford(player, btn.sector.unlock_cost, 0)
+
+                -- Save player progress
+                local success, error = Save.write(player)
+                if not success then
+                    print("Failed to save player data:", error)
+                end
             else
                 -- Cannot afford (could show error message)
                 print("Cannot afford to unlock!")
@@ -337,6 +344,12 @@ function MapScreen.mousepressed(x, y, button)
                     -- Refresh button state
                     btn.isUnlocked = true
                     btn.canAfford = Player.canAfford(player, btn.sector.unlock_cost, 0)
+
+                    -- Save player progress
+                    local success, error = Save.write(player)
+                    if not success then
+                        print("Failed to save player data:", error)
+                    end
                 else
                     -- Cannot afford (could show error message)
                     print("Cannot afford to unlock!")

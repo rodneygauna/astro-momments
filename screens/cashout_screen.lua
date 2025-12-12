@@ -3,6 +3,7 @@
 local CashoutScreen = {}
 
 local Player = require("src/player")
+local Save = require("src/save")
 
 -- Cashout state
 local player
@@ -62,6 +63,12 @@ function CashoutScreen.load(playerData, states, stateChanger, sector, cargo)
     -- Award gold to player
     Player.addGold(player, totalValue)
     hasProcessedReward = true
+
+    -- Save player progress
+    local success, error = Save.write(player)
+    if not success then
+        print("Failed to save player data:", error)
+    end
 end
 
 -- Update cashout screen

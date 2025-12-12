@@ -46,6 +46,10 @@ local function changeGameState(newState, ...)
         CashoutScreen.load(player, gameStates, changeGameState, sector, cargo)
         currentScreen = CashoutScreen
     elseif newState == gameStates.MAP_SELECTION then
+        local loadedPlayer = ...
+        if loadedPlayer then
+            player = loadedPlayer -- Update global player with loaded data
+        end
         MapScreen.load(player, gameStates, changeGameState)
         currentScreen = MapScreen
     elseif newState == gameStates.PAUSED then
