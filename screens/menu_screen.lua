@@ -131,6 +131,13 @@ function MenuScreen.draw()
         love.graphics.setColor(textColor)
         love.graphics.printf(button.text, buttonX, buttonY + (menu.buttonHeight - 20) / 2, menu.buttonWidth, "center")
     end
+
+    -- Draw controls help
+    love.graphics.setColor(0.7, 0.7, 0.7)
+    love.graphics.setFont(love.graphics.newFont(14))
+    local controlsY = love.graphics.getHeight() - 50
+    love.graphics.printf("[W/S or UP/DOWN] Navigate  [ENTER/SPACE or CLICK] Select  [ESC] Quit", 0, controlsY,
+        love.graphics.getWidth(), "center")
 end
 
 -- Handle keyboard input
@@ -139,7 +146,7 @@ function MenuScreen.keypressed(key)
         return
     end
 
-    if key == "up" then
+    if key == "up" or key == "w" then
         -- Move selection up (skip disabled buttons)
         repeat
             menu.selectedIndex = menu.selectedIndex - 1
@@ -147,7 +154,7 @@ function MenuScreen.keypressed(key)
                 menu.selectedIndex = #menu.buttons
             end
         until menu.buttons[menu.selectedIndex].enabled
-    elseif key == "down" then
+    elseif key == "down" or key == "s" then
         -- Move selection down (skip disabled buttons)
         repeat
             menu.selectedIndex = menu.selectedIndex + 1

@@ -291,7 +291,8 @@ function UpgradeScreen.draw()
     love.graphics.setColor(0.7, 0.7, 0.7)
     love.graphics.setFont(love.graphics.newFont(14))
     local controlsY = screenHeight - 50
-    love.graphics.printf("[W/S] Navigate  [SPACE] Purchase  [ESC] Exit", 0, controlsY, screenWidth, "center")
+    love.graphics.printf("[W/S or UP/DOWN] Navigate  [ENTER/SPACE or CLICK] Purchase  [ESC] Exit", 0, controlsY,
+        screenWidth, "center")
 
     -- Reset line width
     love.graphics.setLineWidth(1)

@@ -14,6 +14,7 @@ local hoveredButton
 local upgradeButton
 local scrollOffset
 local maxVisibleSectors
+local selectedIndex
 
 -- Initialize map screen
 function MapScreen.load(playerData, states, stateChanger)
@@ -23,6 +24,7 @@ function MapScreen.load(playerData, states, stateChanger)
     hoveredButton = nil
     scrollOffset = 0
     maxVisibleSectors = 6 -- Show 6 sectors at a time
+    selectedIndex = 1 -- Start with first sector selected
 
     -- Create upgrade button
     upgradeButton = {
@@ -130,7 +132,7 @@ function MapScreen.draw()
     -- Draw sector buttons (only visible ones)
     for i = startIndex, endIndex do
         local button = sectorButtons[i]
-        local isHovered = (hoveredButton == button)
+        local isHovered = (hoveredButton == button) or (selectedIndex == i)
 
         -- Recalculate button Y position for scrolling
         local buttonWidth = 500
@@ -236,7 +238,8 @@ function MapScreen.draw()
 
     -- Draw instructions
     love.graphics.setColor(0.7, 0.7, 0.7)
-    love.graphics.printf("Click a sector to travel | [U] Upgrades | [W/S] Scroll | ESC to return to menu", 0,
+    love.graphics.setFont(love.graphics.newFont(14))
+    love.graphics.printf("[W/S or UP/DOWN] Navigate  [ENTER/SPACE or CLICK] Select  [U] Upgrades  [ESC] Menu", 0,
         love.graphics.getHeight() - 40, love.graphics.getWidth(), "center")
 end
 
@@ -247,14 +250,53 @@ function MapScreen.keypressed(key)
     elseif key == "u" then
         changeState(gameStates.SKILL_TREE)
     elseif key == "w" or key == "up" then
-        -- Scroll up
-        if scrollOffset > 0 then
-            scrollOffset = scrollOffset - 1
+        -- Navigate up
+        if selectedIndex > 1 then
+            selectedIndex = selectedIndex - 1
+            -- Auto-scroll to keep selected button visible
+            if selectedIndex < scrollOffset + 1 then
+                scrollOffset = selectedIndex - 1
+            end
         end
     elseif key == "s" or key == "down" then
-        -- Scroll down
-        if scrollOffset < #sectorButtons - maxVisibleSectors then
-            scrollOffset = scrollOffset + 1
+        -- Navigate down
+        if selectedIndex < #sectorButtons then
+            selectedIndex = selectedIndex + 1
+            -- Auto-scroll to keep selected button visible
+            if selectedIndex > scrollOffset + maxVisibleSectors then
+                scrollOffset = selectedIndex - maxVisibleSectors
+            end
+        end
+    elseif key == "return" or key == "space" then
+        -- Select the currently highlighted sector
+        local btn = sectorButtons[selectedIndex]
+
+        if btn.isUnlocked then
+            -- Calculate actual fuel cost with efficiency upgrade
+            local fuelEfficiency = (player.stats.fuelEfficiency or 0) / 100
+            local actualFuelCost = math.ceil(btn.sector.fuel_cost * (1 - fuelEfficiency))
+
+            -- Check if player has enough fuel
+            if player.currency.fuel >= actualFuelCost then
+                -- Deduct fuel and start mining
+                Player.purchase(player, 0, actualFuelCost)
+                changeState(gameStates.MINING, btn.sectorId)
+            else
+                -- Not enough fuel (could show error message)
+                print("Not enough fuel!")
+            end
+        else
+            -- Try to unlock sector
+            if Player.canAfford(player, btn.sector.unlock_cost, 0) then
+                Player.purchase(player, btn.sector.unlock_cost, 0)
+                Player.unlockMap(player, btn.sectorId)
+                -- Refresh button state
+                btn.isUnlocked = true
+                btn.canAfford = Player.canAfford(player, btn.sector.unlock_cost, 0)
+            else
+                -- Cannot afford (could show error message)
+                print("Cannot afford to unlock!")
+            end
         end
     end
 end

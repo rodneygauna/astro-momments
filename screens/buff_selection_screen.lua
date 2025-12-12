@@ -14,6 +14,7 @@ local selectedBuffs
 local selectionsRemaining
 local maxSelections
 local hoveredButton
+local selectedIndex
 
 -- Initialize buff selection screen
 function BuffSelectionScreen.load(playerData, states, stateChanger)
@@ -21,6 +22,7 @@ function BuffSelectionScreen.load(playerData, states, stateChanger)
     gameStates = states
     changeState = stateChanger
     hoveredButton = nil
+    selectedIndex = 1
 
     -- Initialize selection state
     maxSelections = 3
@@ -87,7 +89,7 @@ function BuffSelectionScreen.draw()
 
     for i, buff in ipairs(buffChoices) do
         local buttonY = startY + (i - 1) * (buttonHeight + buttonSpacing)
-        local isHovered = (hoveredButton == i)
+        local isHovered = (hoveredButton == i) or (selectedIndex == i)
 
         -- Get rarity color
         local rarityColor = Buff.getRarityColor(buff.rarity)
@@ -135,14 +137,53 @@ function BuffSelectionScreen.draw()
 
     -- Draw instructions
     love.graphics.setColor(0.7, 0.7, 0.7)
-    love.graphics.printf("Click a buff to select it", 0, love.graphics.getHeight() - 60, love.graphics.getWidth(),
-        "center")
+    love.graphics.setFont(love.graphics.newFont(14))
+    love.graphics.printf("[W/S or UP/DOWN] Navigate  [ENTER/SPACE or CLICK] Select  [ESC] Back", 0,
+        love.graphics.getHeight() - 50, love.graphics.getWidth(), "center")
 end
 
 -- Handle keyboard input
 function BuffSelectionScreen.keypressed(key)
-    -- Allow ESC to go back to menu (only if no selections made yet)
-    if key == "escape" and #selectedBuffs == 0 then
+    if key == "w" or key == "up" then
+        -- Move selection up
+        selectedIndex = selectedIndex - 1
+        if selectedIndex < 1 then
+            selectedIndex = #buffChoices
+        end
+    elseif key == "s" or key == "down" then
+        -- Move selection down
+        selectedIndex = selectedIndex + 1
+        if selectedIndex > #buffChoices then
+            selectedIndex = 1
+        end
+    elseif key == "return" or key == "space" then
+        -- Select the currently highlighted buff
+        local selectedBuff = buffChoices[selectedIndex]
+
+        -- Add buff to selected buffs list
+        table.insert(selectedBuffs, selectedBuff)
+
+        -- Decrease selections remaining
+        selectionsRemaining = selectionsRemaining - 1
+
+        -- Check if all selections are made
+        if selectionsRemaining <= 0 then
+            -- Store selected buffs in player data for later application
+            player.activeBuffs = selectedBuffs
+
+            -- Reset fuel for the new run
+            Player.resetFuel(player)
+
+            -- Move to map selection
+            changeState(gameStates.MAP_SELECTION)
+        else
+            -- Generate new buff choices for next selection
+            buffChoices = Buff.generateSelection(3)
+            -- Reset selected index to first buff
+            selectedIndex = 1
+        end
+    elseif key == "escape" and #selectedBuffs == 0 then
+        -- Allow ESC to go back to menu (only if no selections made yet)
         changeState(gameStates.MENU)
     end
 end
