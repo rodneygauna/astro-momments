@@ -4,6 +4,7 @@ local MenuScreen = {}
 
 -- Menu state
 local menu = {}
+local backgroundImage
 
 -- Helper function: Get menu button Y position
 local function getButtonY(index, totalButtons)
@@ -24,6 +25,10 @@ end
 
 -- Initialize menu
 function MenuScreen.load(gameStates, changeState)
+    -- Load background image
+    backgroundImage = love.graphics.newImage("sprites/Nebula_God.png")
+    backgroundImage:setFilter("nearest", "nearest") -- Prevents blurriness when scaling
+
     menu = {}
     menu.buttons = {{
         text = "Continue",
@@ -83,6 +88,14 @@ end
 
 -- Draw menu
 function MenuScreen.draw()
+    -- Draw background image (scaled to fit screen)
+    if backgroundImage then
+        local scaleX = love.graphics.getWidth() / backgroundImage:getWidth()
+        local scaleY = love.graphics.getHeight() / backgroundImage:getHeight()
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.draw(backgroundImage, 0, 0, 0, scaleX, scaleY)
+    end
+
     -- Draw title
     love.graphics.setColor(1, 1, 1)
     local titleFont = love.graphics.newFont(48)
