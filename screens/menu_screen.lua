@@ -3,6 +3,7 @@
 local MenuScreen = {}
 
 local Save = require("src.save")
+local Upgrades = require("src.upgrades")
 
 -- Menu state
 local menu = {}
@@ -85,6 +86,8 @@ local function handleMenuAction(action)
         -- Load save file and continue
         local player, error = Save.read()
         if player then
+            -- Recalculate all upgrade effects from skills
+            Upgrades.applyUpgradeEffects(player)
             -- Successfully loaded, go to map selection with loaded player
             menu.changeState(menu.gameStates.MAP_SELECTION, player)
         else

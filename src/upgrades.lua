@@ -159,6 +159,21 @@ Upgrades.catalog = {
         }
     },
 
+    fuel_tank_expansion = {
+        id = "fuel_tank_expansion",
+        name = "Fuel Tank Expansion",
+        description = "Increases maximum fuel capacity",
+        category = "efficiency",
+        maxLevel = 5,
+        baseCost = 150,
+        costMultiplier = 1.8,
+        effect = {
+            stat = "fuelCapacityBonus",
+            type = "flat",
+            valuePerLevel = 4 -- +4 max fuel per level (5 levels = +20, total max 25)
+        }
+    },
+
     -- Spawn Control
     asteroid_density = {
         id = "asteroid_density",
@@ -272,6 +287,8 @@ end
 
 -- Apply all upgrade effects to player stats
 function Upgrades.applyUpgradeEffects(player)
+    print("=== APPLYING UPGRADE EFFECTS ===")
+
     -- Reset stats to base values
     player.stats.movementSpeedBonus = 0
     player.stats.accelerationBonus = 0
@@ -283,6 +300,7 @@ function Upgrades.applyUpgradeEffects(player)
     player.stats.goldMultiplier = 0
     player.stats.missionTimeBonus = 0
     player.stats.fuelEfficiency = 0
+    player.stats.fuelCapacityBonus = 0
     player.stats.spawnRateBonus = 0
 
     -- Apply all purchased upgrades
@@ -291,6 +309,8 @@ function Upgrades.applyUpgradeEffects(player)
         if upgrade and skill.level > 0 then
             local effectValue = Upgrades.getEffectValue(skill.id, skill.level)
 
+            print("  Applying:", skill.id, "level", skill.level, "->", upgrade.effect.stat, "=", effectValue)
+
             if upgrade.effect.type == "threshold" then
                 player.stats[upgrade.effect.stat] = effectValue
             else
@@ -298,6 +318,9 @@ function Upgrades.applyUpgradeEffects(player)
             end
         end
     end
+
+    print("  Final fuelCapacityBonus:", player.stats.fuelCapacityBonus)
+    print("================================")
 end
 
 -- Get all upgrades grouped by category

@@ -5,6 +5,7 @@ local MapScreen = {}
 local Player = require("src/player")
 local Sector = require("src/sector")
 local Save = require("src/save")
+local Upgrades = require("src/upgrades")
 
 -- Map screen state
 local player
@@ -13,6 +14,7 @@ local changeState
 local sectorButtons
 local hoveredButton
 local upgradeButton
+local refuelButton
 local scrollOffset
 local maxVisibleSectors
 local selectedIndex
@@ -22,6 +24,10 @@ function MapScreen.load(playerData, states, stateChanger)
     player = playerData
     gameStates = states
     changeState = stateChanger
+
+    -- Ensure upgrade effects are applied to player stats
+    Upgrades.applyUpgradeEffects(player)
+
     hoveredButton = nil
     scrollOffset = 0
     maxVisibleSectors = 6 -- Show 6 sectors at a time
@@ -34,6 +40,15 @@ function MapScreen.load(playerData, states, stateChanger)
         width = 150,
         height = 50,
         text = "UPGRADES"
+    }
+
+    -- Create refuel button (positioned in right corner, opposite of upgrade button)
+    refuelButton = {
+        x = love.graphics.getWidth() - 220,
+        y = 20,
+        width = 200,
+        height = 50,
+        text = "REFUEL"
     }
 
     -- Create sector buttons
@@ -82,6 +97,13 @@ function MapScreen.update(dt)
         return
     end
 
+    -- Check refuel button hover
+    if mouseX >= refuelButton.x and mouseX <= refuelButton.x + refuelButton.width and mouseY >= refuelButton.y and
+        mouseY <= refuelButton.y + refuelButton.height then
+        hoveredButton = refuelButton
+        return
+    end
+
     -- Only check visible sector buttons for hover
     local startIndex = scrollOffset + 1
     local endIndex = math.min(scrollOffset + maxVisibleSectors, #sectorButtons)
@@ -113,6 +135,52 @@ function MapScreen.draw()
     love.graphics.setColor(1, 1, 1)
     love.graphics.printf(upgradeButton.text, upgradeButton.x, upgradeButton.y + 15, upgradeButton.width, "center")
 
+    -- Draw refuel button
+    local isRefuelHovered = (hoveredButton == refuelButton)
+    local needsEmergency = Player.needsEmergencyBeacon(player)
+    local cost, fuelGained = Player.calculateRefuelCost(player)
+    local canRefuel = cost > 0 and fuelGained > 0 and player.currency.gold >= cost
+
+    -- Determine button state and text
+    local buttonText, buttonColor, textColor
+    if needsEmergency then
+        -- Emergency beacon mode
+        buttonText = "EMERGENCY BEACON"
+        if isRefuelHovered then
+            buttonColor = {0.9, 0.4, 0.4}
+        else
+            buttonColor = {0.8, 0.3, 0.3}
+        end
+        textColor = {1, 1, 1}
+    elseif fuelGained == 0 then
+        -- Already at max fuel
+        buttonText = "REFUEL (FULL)"
+        buttonColor = {0.3, 0.3, 0.3}
+        textColor = {0.6, 0.6, 0.6}
+    elseif player.currency.gold == 0 then
+        -- No gold - show disabled
+        buttonText = "Refuel (+" .. fuelGained .. "): " .. cost .. "g"
+        buttonColor = {0.3, 0.3, 0.3}
+        textColor = {0.6, 0.6, 0.6}
+    else
+        -- Normal refuel mode
+        buttonText = "Refuel (+" .. fuelGained .. "): " .. cost .. "g"
+        if isRefuelHovered then
+            buttonColor = {0.4, 0.7, 0.4}
+        else
+            buttonColor = {0.3, 0.6, 0.3}
+        end
+        textColor = {1, 1, 1}
+    end
+
+    -- Draw button
+    love.graphics.setColor(buttonColor)
+    love.graphics.rectangle("fill", refuelButton.x, refuelButton.y, refuelButton.width, refuelButton.height, 5, 5)
+    love.graphics.setColor(textColor)
+    love.graphics.setFont(love.graphics.newFont(14))
+    love.graphics.printf(buttonText, refuelButton.x, refuelButton.y + 18, refuelButton.width, "center")
+    love.graphics.setFont(love.graphics.newFont(16))
+
     -- Draw gold display next to upgrade button
     love.graphics.setColor(1, 0.9, 0.3)
     love.graphics.printf("Gold: " .. player.currency.gold, upgradeButton.x + upgradeButton.width + 20,
@@ -124,7 +192,9 @@ function MapScreen.draw()
 
     -- Draw fuel display
     love.graphics.setColor(0.3, 0.8, 1)
-    love.graphics.printf("Fuel: " .. player.currency.fuel, 0, 70, love.graphics.getWidth(), "center")
+    local maxFuel = Player.getMaxFuel(player)
+    love.graphics
+        .printf("Fuel: " .. player.currency.fuel .. " / " .. maxFuel, 0, 70, love.graphics.getWidth(), "center")
 
     -- Calculate visible range
     local startIndex = scrollOffset + 1
@@ -240,7 +310,7 @@ function MapScreen.draw()
     -- Draw instructions
     love.graphics.setColor(0.7, 0.7, 0.7)
     love.graphics.setFont(love.graphics.newFont(14))
-    love.graphics.printf("[W/S or UP/DOWN] Navigate  [ENTER/SPACE or CLICK] Select  [U] Upgrades  [ESC] Menu", 0,
+    love.graphics.printf("[W/S or UP/DOWN] Navigate  [ENTER/SPACE] Select  [U] Upgrades  [R] Refuel  [ESC] Menu", 0,
         love.graphics.getHeight() - 40, love.graphics.getWidth(), "center")
 end
 
@@ -250,6 +320,33 @@ function MapScreen.keypressed(key)
         changeState(gameStates.MENU)
     elseif key == "u" then
         changeState(gameStates.SKILL_TREE)
+    elseif key == "r" then
+        -- Handle refuel or emergency beacon
+        if Player.needsEmergencyBeacon(player) then
+            local success, message = Player.useEmergencyBeacon(player)
+            if success then
+                print(message)
+                -- Save player progress
+                local saveSuccess, saveError = Save.write(player)
+                if not saveSuccess then
+                    print("Failed to save player data:", saveError)
+                end
+            end
+        else
+            local success, message = Player.refuel(player)
+            if success then
+                print(message)
+                -- Save player progress
+                local saveSuccess, saveError = Save.write(player)
+                if not saveSuccess then
+                    print("Failed to save player data:", saveError)
+                end
+                -- Navigate to buff selection after refueling
+                changeState(gameStates.ROUND_START_BUFF_SELECTION)
+            else
+                print(message)
+            end
+        end
     elseif key == "w" or key == "up" then
         -- Navigate up
         if selectedIndex > 1 then
@@ -315,6 +412,37 @@ function MapScreen.mousepressed(x, y, button)
         if x >= upgradeButton.x and x <= upgradeButton.x + upgradeButton.width and y >= upgradeButton.y and y <=
             upgradeButton.y + upgradeButton.height then
             changeState(gameStates.SKILL_TREE)
+            return
+        end
+
+        -- Check if refuel button was clicked
+        if x >= refuelButton.x and x <= refuelButton.x + refuelButton.width and y >= refuelButton.y and y <=
+            refuelButton.y + refuelButton.height then
+            if Player.needsEmergencyBeacon(player) then
+                local success, message = Player.useEmergencyBeacon(player)
+                if success then
+                    print(message)
+                    -- Save player progress
+                    local saveSuccess, saveError = Save.write(player)
+                    if not saveSuccess then
+                        print("Failed to save player data:", saveError)
+                    end
+                end
+            else
+                local success, message = Player.refuel(player)
+                if success then
+                    print(message)
+                    -- Save player progress
+                    local saveSuccess, saveError = Save.write(player)
+                    if not saveSuccess then
+                        print("Failed to save player data:", saveError)
+                    end
+                    -- Navigate to buff selection after refueling
+                    changeState(gameStates.ROUND_START_BUFF_SELECTION)
+                else
+                    print(message)
+                end
+            end
             return
         end
 

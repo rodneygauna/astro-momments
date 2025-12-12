@@ -25,10 +25,10 @@ function UpgradeScreen.load(playerData, states, stateChanger)
     scrollOffset = 0
     maxVisibleUpgrades = 6
 
-    -- Build ordered upgrade list (11 total upgrades)
+    -- Build ordered upgrade list (12 total upgrades)
     upgradeList = {"engine_boost", "thruster_efficiency", "magnetic_field", "collection_speed", "decay_resistance",
                    "auto_collect", "cargo_expansion", "cashout_multiplier", "extended_mission", "fuel_efficiency",
-                   "asteroid_density"}
+                   "fuel_tank_expansion", "asteroid_density"}
 
     selectedUpgradeId = upgradeList[selectedIndex]
 

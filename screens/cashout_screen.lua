@@ -18,6 +18,7 @@ local hasProcessedReward
 local baseValue -- Value before multiplier
 local valueMultiplier -- Multiplier from buffs
 local goldMultiplier -- Multiplier from upgrades
+local emergencyPenalty -- Emergency beacon penalty
 
 -- Initialize cashout screen
 function CashoutScreen.load(playerData, states, stateChanger, sector, cargo)
@@ -58,7 +59,16 @@ function CashoutScreen.load(playerData, states, stateChanger, sector, cargo)
 
     -- Apply gold multiplier from upgrades
     goldMultiplier = 1.0 + ((player.stats.goldMultiplier or 0) / 100)
-    totalValue = math.floor(baseValue * valueMultiplier * goldMultiplier)
+
+    -- Apply emergency beacon penalty if active
+    emergencyPenalty = 1.0
+    if player.progress.emergencyBeaconPenalty then
+        emergencyPenalty = 0.9 -- 10% reduction
+        -- Clear the penalty flag after applying it
+        player.progress.emergencyBeaconPenalty = false
+    end
+
+    totalValue = math.floor(baseValue * valueMultiplier * goldMultiplier * emergencyPenalty)
 
     -- Award gold to player
     Player.addGold(player, totalValue)
@@ -146,7 +156,7 @@ function CashoutScreen.draw()
     local multiplierY = panelY + panelHeight - 120
 
     -- Always show base value if any multipliers are active
-    if valueMultiplier > 1.0 or goldMultiplier > 1.0 then
+    if valueMultiplier > 1.0 or goldMultiplier > 1.0 or emergencyPenalty < 1.0 then
         love.graphics.setColor(0.7, 0.7, 0.7)
         love.graphics.printf("Base Value:", panelX + 50, multiplierY, 300, "left")
         love.graphics.printf(tostring(baseValue) .. " Gold", panelX + 350, multiplierY, 200, "right")
@@ -165,6 +175,15 @@ function CashoutScreen.draw()
             love.graphics.setColor(1, 0.8, 0.3)
             love.graphics.printf("Cashout Upgrade:", panelX + 50, multiplierY, 300, "left")
             love.graphics.printf("x" .. string.format("%.2f", goldMultiplier), panelX + 350, multiplierY, 200, "right")
+            multiplierY = multiplierY + 20
+        end
+
+        -- Draw emergency beacon penalty if active
+        if emergencyPenalty < 1.0 then
+            love.graphics.setColor(1, 0.4, 0.4)
+            love.graphics.printf("Emergency Beacon:", panelX + 50, multiplierY, 300, "left")
+            love.graphics
+                .printf("x" .. string.format("%.2f", emergencyPenalty), panelX + 350, multiplierY, 200, "right")
             multiplierY = multiplierY + 20
         end
 
@@ -187,14 +206,8 @@ end
 -- Handle keyboard input
 function CashoutScreen.keypressed(key)
     if key == "space" or key == "return" then
-        -- Check if player has fuel to continue mining
-        if player.currency.fuel > 0 then
-            changeState(gameStates.MAP_SELECTION)
-        else
-            -- Out of fuel, clear active buffs and return to menu
-            player.activeBuffs = nil
-            changeState(gameStates.MENU)
-        end
+        -- Always return to map selection where player can refuel if needed
+        changeState(gameStates.MAP_SELECTION)
     end
 end
 

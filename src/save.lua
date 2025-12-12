@@ -62,6 +62,11 @@ function Save.read()
             -- Could add migration logic here in the future
         end
 
+        -- Migration: Remove deprecated maxFuel field from currency
+        if saveData.player and saveData.player.currency and saveData.player.currency.maxFuel then
+            saveData.player.currency.maxFuel = nil
+        end
+
         return saveData.player
     end)
 
