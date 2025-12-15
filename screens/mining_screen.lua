@@ -20,6 +20,8 @@ local gameStates
 local changeState
 local currentSector
 local gameState -- For storing buff-related state like value multiplier
+local farStars -- Background star layer (slow parallax)
+local nearStars -- Foreground star layer (fast parallax)
 
 -- Helper function to get asteroid types for current sector
 local function getSectorAsteroidTypes()
@@ -52,6 +54,54 @@ function MiningScreen.load(camera, playerData, states, stateChanger, sectorId)
     playableArea.radius = (smallerDimension * 0.9) / 2
     playableArea.x = love.graphics.getWidth() / 2
     playableArea.y = love.graphics.getHeight() / 2
+
+    -- Generate parallax star field
+    -- Far layer: smaller, dimmer stars across a larger area
+    farStars = {}
+    local starFieldSize = playableArea.radius * 3 -- Larger than playable area
+    for i = 1, 150 do
+        local angle = math.random() * 2 * math.pi
+        local distance = math.random() * starFieldSize
+        local colorVariant = math.random()
+        local starColor
+        if colorVariant < 0.6 then
+            starColor = {1, 1, 1} -- White
+        elseif colorVariant < 0.85 then
+            starColor = {0.7, 0.8, 1} -- Blue-white
+        else
+            starColor = {1, 0.95, 0.7} -- Yellow-white
+        end
+        table.insert(farStars, {
+            x = playableArea.x + math.cos(angle) * distance,
+            y = playableArea.y + math.sin(angle) * distance,
+            size = 1,
+            brightness = 0.3 + math.random() * 0.3,
+            color = starColor
+        })
+    end
+
+    -- Near layer: larger, brighter stars
+    nearStars = {}
+    for i = 1, 80 do
+        local angle = math.random() * 2 * math.pi
+        local distance = math.random() * starFieldSize
+        local colorVariant = math.random()
+        local starColor
+        if colorVariant < 0.6 then
+            starColor = {1, 1, 1} -- White
+        elseif colorVariant < 0.85 then
+            starColor = {0.7, 0.8, 1} -- Blue-white
+        else
+            starColor = {1, 0.95, 0.7} -- Yellow-white
+        end
+        table.insert(nearStars, {
+            x = playableArea.x + math.cos(angle) * distance,
+            y = playableArea.y + math.sin(angle) * distance,
+            size = 1.5 + math.random() * 0.5,
+            brightness = 0.5 + math.random() * 0.5,
+            color = starColor
+        })
+    end
 
     -- Initialize spaceship
     spaceship = Spaceship.new(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2, player)
@@ -137,6 +187,26 @@ end
 
 -- Draw mining screen
 function MiningScreen.draw()
+    -- Draw background stars with parallax (before camera attach)
+    local camX, camY = cam:position()
+    local centerX, centerY = love.graphics.getWidth() / 2, love.graphics.getHeight() / 2
+
+    -- Draw far stars (20% parallax - slower movement)
+    for _, star in ipairs(farStars) do
+        local offsetX = (camX - centerX) * 0.2
+        local offsetY = (camY - centerY) * 0.2
+        love.graphics.setColor(star.color[1], star.color[2], star.color[3], star.brightness)
+        love.graphics.circle("fill", star.x - offsetX, star.y - offsetY, star.size)
+    end
+
+    -- Draw near stars (60% parallax - faster movement)
+    for _, star in ipairs(nearStars) do
+        local offsetX = (camX - centerX) * 0.6
+        local offsetY = (camY - centerY) * 0.6
+        love.graphics.setColor(star.color[1], star.color[2], star.color[3], star.brightness)
+        love.graphics.circle("fill", star.x - offsetX, star.y - offsetY, star.size)
+    end
+
     -- Attach camera for world rendering
     cam:attach()
 
