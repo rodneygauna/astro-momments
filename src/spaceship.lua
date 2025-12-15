@@ -2,6 +2,10 @@
 -- Handles spaceship physics, movement, and state
 local Spaceship = {}
 
+-- Load spaceship sprite
+local spaceshipImage = love.graphics.newImage("sprites/Spaceship.png")
+spaceshipImage:setFilter("nearest", "nearest") -- Crisp pixel art
+
 -- Create a new spaceship
 function Spaceship.new(x, y, player)
     local baseCollectionRadius = 100 + (player.stats.collectionRadiusBonus or 0)
@@ -24,7 +28,8 @@ function Spaceship.new(x, y, player)
         isMoving = false,
         maxCargo = 5 + player.stats.cargoCapacityBonus, -- Base cargo + bonus from skills
         currentCargo = 0,
-        collectedAsteroids = {} -- Track collected asteroids for cashout
+        collectedAsteroids = {}, -- Track collected asteroids for cashout
+        rotation = 0 -- Current rotation angle in radians
     }
 end
 
@@ -125,6 +130,11 @@ function Spaceship.update(spaceship, dt, playableArea)
     spaceship.currentSpeed = math.sqrt(spaceship.velocityX * spaceship.velocityX + spaceship.velocityY *
                                            spaceship.velocityY)
 
+    -- Update rotation to point in direction of movement
+    if spaceship.currentSpeed > 1 then -- Only rotate if moving at reasonable speed
+        spaceship.rotation = math.atan2(spaceship.velocityY, spaceship.velocityX)
+    end
+
     -- Apply velocity to position
     local newX = spaceship.x + spaceship.velocityX * dt
     local newY = spaceship.y + spaceship.velocityY * dt
@@ -160,12 +170,22 @@ end
 
 -- Draw the spaceship
 function Spaceship.draw(spaceship)
-    -- Prototype for the spaceship (a square)
-    love.graphics.setColor(0, 1, 0) -- Green color
-    love.graphics.rectangle("fill", spaceship.x, spaceship.y, 30, 30)
+    -- Draw spaceship sprite
+    love.graphics.setColor(1, 1, 1) -- White (no tint)
+    local spriteWidth = spaceshipImage:getWidth()
+    local spriteHeight = spaceshipImage:getHeight()
+    -- Draw sprite rotated around its center
+    love.graphics.draw(spaceshipImage, spaceship.x + 15, -- Draw at ship center X
+    spaceship.y + 15, -- Draw at ship center Y
+    spaceship.rotation + math.pi / 2, -- Rotation in radians + 90 degree offset (sprite faces up by default)
+    1, 1, -- Scale X, Y
+    spriteWidth / 2, -- Origin X (center of sprite)
+    spriteHeight / 2 -- Origin Y (center of sprite)
+    )
 
-    -- Prototype of the collection field around the spaceship
-    love.graphics.setColor(0, 1, 1) -- Cyan color
+    -- Collection field around the spaceship
+    -- Blue (RGB: 99, 155, 255) with transparency
+    love.graphics.setColor(99 / 255, 155 / 255, 255 / 255, 0.7)
     love.graphics.circle("line", spaceship.x + 15, spaceship.y + 15, spaceship.collectionRadius)
 end
 
