@@ -5,64 +5,84 @@ local Asteroid = {}
 -- Asteroid type definitions (Interesting read: https://en.wikipedia.org/wiki/Asteroid_mining)
 Asteroid.types = {{
     id = "silicates", -- Olivine, pyroxene; most common
-    value = 1
+    value = 1,
+    color = {0.5, 0.4, 0.3} -- Gray-brown
 }, {
     id = "carbonaceous", -- Organic-rich material
-    value = 2
+    value = 2,
+    color = {0.2, 0.15, 0.1} -- Dark brown/black
 }, {
     id = "iron", -- Metallic iron
-    value = 3
+    value = 3,
+    color = {0.4, 0.4, 0.45} -- Dark metallic gray
 }, {
     id = "nickel", -- Iron-nickel alloy component
-    value = 5
+    value = 5,
+    color = {0.45, 0.45, 0.4} -- Nickel gray
 }, {
     id = "magnesium_silicates", -- Olivine variants
-    value = 8
+    value = 8,
+    color = {0.5, 0.5, 0.35} -- Olive-green gray
 }, {
     id = "aluminum_minerals", -- Plagioclase group
-    value = 13
+    value = 13,
+    color = {0.7, 0.7, 0.7} -- Light gray
 }, {
     id = "calcium_minerals", -- Anorthite, etc.
-    value = 31
+    value = 31,
+    color = {0.8, 0.8, 0.75} -- Off-white
 }, {
     id = "sulfides", -- Troilite (FeS)
-    value = 44
+    value = 44,
+    color = {0.6, 0.5, 0.2} -- Brassy yellow-brown
 }, {
     id = "water_ice", -- Often found in outer-belt asteroids
-    value = 75
+    value = 75,
+    color = {0.7, 0.9, 1.0} -- Light blue
 }, {
     id = "carbonates", -- Calcite, dolomite
-    value = 1109
+    value = 1109,
+    color = {0.9, 0.9, 0.85} -- Cream white
 }, {
     id = "clay_minerals", -- Phyllosilicates
-    value = 11
+    value = 11,
+    color = {0.55, 0.45, 0.35} -- Clay brown
 }, {
     id = "graphite", -- Pure carbon crystals
-    value = 12
+    value = 12,
+    color = {0.15, 0.15, 0.15} -- Very dark gray
 }, {
     id = "chromium_oxides", -- Chromite and related minerals
-    value = 13
+    value = 13,
+    color = {0.3, 0.3, 0.25} -- Dark gray-green
 }, {
     id = "cobalt", -- Trace metal in iron meteorites
-    value = 14
+    value = 14,
+    color = {0.5, 0.5, 0.6} -- Blue-gray metallic
 }, {
     id = "titanium_oxides", -- Rutile, ilmenite
-    value = 15
+    value = 15,
+    color = {0.3, 0.25, 0.3} -- Dark purple-gray
 }, {
     id = "rare_earths", -- REE-bearing minerals
-    value = 16
+    value = 16,
+    color = {0.6, 0.4, 0.7} -- Purple-tinted
 }, {
     id = "platinum_group", -- Pt, Ir, Os, Pd
-    value = 17
+    value = 17,
+    color = {0.8, 0.8, 0.85} -- Silver-white
 }, {
     id = "gold", -- Present in trace amounts
-    value = 18
+    value = 18,
+    color = {1.0, 0.84, 0} -- Golden
 }, {
     id = "microdiamonds", -- Nanodiamonds from impacts
-    value = 19
+    value = 19,
+    color = {0.9, 0.95, 1.0} -- Bright white-cyan
 }, {
     id = "amino_acids", -- Extremely rare organic precursors
-    value = 20
+    value = 20,
+    color = {0.4, 0.6, 0.5} -- Organic green-gray
 }}
 
 -- Asteroid configuration
@@ -90,6 +110,18 @@ function Asteroid.spawn(playableArea, currentAsteroidCount, allowedTypes)
     local asteroidRatio = currentAsteroidCount / Asteroid.maxAsteroids
     local dynamicSpawnDuration = 0.1 + (asteroidRatio * 0.8) -- Range: 0.1 to 0.9 seconds
 
+    -- Generate random polygon vertices for jagged appearance
+    local numVertices = math.random(6, 9) -- 6-9 sided polygon
+    local vertices = {}
+    local baseRadius = 10
+    for i = 1, numVertices do
+        local angleStep = (2 * math.pi) / numVertices
+        local angle = (i - 1) * angleStep + math.random() * 0.3 -- Add randomness to angle
+        local radiusVariation = baseRadius * (0.7 + math.random() * 0.6) -- 70% to 130% of base
+        table.insert(vertices, math.cos(angle) * radiusVariation)
+        table.insert(vertices, math.sin(angle) * radiusVariation)
+    end
+
     return {
         x = asteroidX,
         y = asteroidY,
@@ -97,7 +129,8 @@ function Asteroid.spawn(playableArea, currentAsteroidCount, allowedTypes)
         spawnDuration = dynamicSpawnDuration,
         direction = nil,
         collectionMeter = 0,
-        asteroidType = asteroidType -- Store the type data
+        asteroidType = asteroidType, -- Store the type data
+        vertices = vertices -- Store polygon shape
     }
 end
 
@@ -179,8 +212,16 @@ function Asteroid.draw(asteroid)
         spawnScale = 1 - math.pow(1 - progress, 3)
     end
 
-    love.graphics.setColor(0.6, 0.4, 0.2) -- Brown/gray color for asteroids
-    love.graphics.circle("fill", asteroid.x, asteroid.y, 10 * spawnScale)
+    -- Use material-specific color
+    local color = asteroid.asteroidType.color or {0.5, 0.4, 0.3}
+    love.graphics.setColor(color[1], color[2], color[3])
+
+    -- Draw polygon asteroid with spawn scale
+    love.graphics.push()
+    love.graphics.translate(asteroid.x, asteroid.y)
+    love.graphics.scale(spawnScale, spawnScale)
+    love.graphics.polygon("fill", asteroid.vertices)
+    love.graphics.pop()
 
     -- Draw collection meter above asteroid if it's being collected
     if asteroid.collectionMeter and asteroid.collectionMeter > 0 then
