@@ -22,6 +22,8 @@ local currentSector
 local gameState -- For storing buff-related state like value multiplier
 local farStars -- Background star layer (slow parallax)
 local nearStars -- Foreground star layer (fast parallax)
+local planetSprite -- Planet background image
+local planetPosition -- Planet position and scale data
 
 -- Helper function to get asteroid types for current sector
 local function getSectorAsteroidTypes()
@@ -54,6 +56,23 @@ function MiningScreen.load(camera, playerData, states, stateChanger, sectorId)
     playableArea.radius = (smallerDimension * 0.9) / 2
     playableArea.x = love.graphics.getWidth() / 2
     playableArea.y = love.graphics.getHeight() / 2
+
+    -- Load and position planet sprite if sector has one
+    planetSprite = nil
+    planetPosition = nil
+    if currentSector.planetImage then
+        planetSprite = love.graphics.newImage(currentSector.planetImage)
+        planetSprite:setFilter("nearest", "nearest") -- Pixel art filter
+
+        -- Generate random position just outside playable area but still visible
+        local angle = math.random() * 2 * math.pi
+        local distance = playableArea.radius * (1.0 + math.random() * 0.4) -- Between 1.0x and 1.4x radius
+        planetPosition = {
+            x = playableArea.x + math.cos(angle) * distance,
+            y = playableArea.y + math.sin(angle) * distance,
+            scale = 1.2 + math.random() * 0.8 -- Random scale between 1.2 and 2.0 for better visibility
+        }
+    end
 
     -- Generate parallax star field
     -- Far layer: smaller, dimmer stars across a larger area
@@ -205,6 +224,16 @@ function MiningScreen.draw()
         local offsetY = (camY - centerY) * 0.6
         love.graphics.setColor(star.color[1], star.color[2], star.color[3], star.brightness)
         love.graphics.circle("fill", star.x - offsetX, star.y - offsetY, star.size)
+    end
+
+    -- Draw planet sprite with subtle parallax (20% - slower than stars)
+    if planetSprite and planetPosition then
+        local offsetX = (camX - centerX) * 0.2
+        local offsetY = (camY - centerY) * 0.2
+        love.graphics.setColor(1, 1, 1, 0.9) -- Slight transparency
+        local planetX = planetPosition.x - offsetX - (planetSprite:getWidth() * planetPosition.scale / 2)
+        local planetY = planetPosition.y - offsetY - (planetSprite:getHeight() * planetPosition.scale / 2)
+        love.graphics.draw(planetSprite, planetX, planetY, 0, planetPosition.scale, planetPosition.scale)
     end
 
     -- Attach camera for world rendering
