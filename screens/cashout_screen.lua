@@ -75,10 +75,7 @@ function CashoutScreen.load(playerData, states, stateChanger, sector, cargo)
     hasProcessedReward = true
 
     -- Save player progress
-    local success, error = Save.write(player)
-    if not success then
-        print("Failed to save player data:", error)
-    end
+    Save.write(player)
 end
 
 -- Update cashout screen

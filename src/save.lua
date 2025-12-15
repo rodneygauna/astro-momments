@@ -58,7 +58,6 @@ function Save.read()
 
         -- Version checking for future migrations
         if saveData.version ~= Save.VERSION then
-            print("Warning: Save version mismatch (expected " .. Save.VERSION .. ", got " .. saveData.version .. ")")
             -- Could add migration logic here in the future
         end
 

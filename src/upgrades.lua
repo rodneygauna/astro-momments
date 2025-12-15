@@ -287,8 +287,6 @@ end
 
 -- Apply all upgrade effects to player stats
 function Upgrades.applyUpgradeEffects(player)
-    print("=== APPLYING UPGRADE EFFECTS ===")
-
     -- Reset stats to base values
     player.stats.movementSpeedBonus = 0
     player.stats.accelerationBonus = 0
@@ -309,8 +307,6 @@ function Upgrades.applyUpgradeEffects(player)
         if upgrade and skill.level > 0 then
             local effectValue = Upgrades.getEffectValue(skill.id, skill.level)
 
-            print("  Applying:", skill.id, "level", skill.level, "->", upgrade.effect.stat, "=", effectValue)
-
             if upgrade.effect.type == "threshold" then
                 player.stats[upgrade.effect.stat] = effectValue
             else
@@ -318,9 +314,6 @@ function Upgrades.applyUpgradeEffects(player)
             end
         end
     end
-
-    print("  Final fuelCapacityBonus:", player.stats.fuelCapacityBonus)
-    print("================================")
 end
 
 -- Get all upgrades grouped by category

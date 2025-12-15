@@ -78,7 +78,6 @@ end
 -- Handle menu button action
 local function handleMenuAction(action)
     if not menu.changeState or not menu.gameStates then
-        print("Error: menu.changeState or menu.gameStates is nil")
         return
     end
 
@@ -92,7 +91,6 @@ local function handleMenuAction(action)
             menu.changeState(menu.gameStates.MAP_SELECTION, player)
         else
             -- Failed to load save
-            print("Failed to load save file:", error)
             -- Could show error message to user here
         end
     elseif action == "new_game" then

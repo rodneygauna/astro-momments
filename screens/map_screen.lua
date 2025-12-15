@@ -325,26 +325,16 @@ function MapScreen.keypressed(key)
         if Player.needsEmergencyBeacon(player) then
             local success, message = Player.useEmergencyBeacon(player)
             if success then
-                print(message)
                 -- Save player progress
-                local saveSuccess, saveError = Save.write(player)
-                if not saveSuccess then
-                    print("Failed to save player data:", saveError)
-                end
+                Save.write(player)
             end
         else
             local success, message = Player.refuel(player)
             if success then
-                print(message)
                 -- Save player progress
-                local saveSuccess, saveError = Save.write(player)
-                if not saveSuccess then
-                    print("Failed to save player data:", saveError)
-                end
+                Save.write(player)
                 -- Navigate to buff selection after refueling
                 changeState(gameStates.ROUND_START_BUFF_SELECTION)
-            else
-                print(message)
             end
         end
     elseif key == "w" or key == "up" then
@@ -381,7 +371,6 @@ function MapScreen.keypressed(key)
                 changeState(gameStates.MINING, btn.sectorId)
             else
                 -- Not enough fuel (could show error message)
-                print("Not enough fuel!")
             end
         else
             -- Try to unlock sector
@@ -393,13 +382,9 @@ function MapScreen.keypressed(key)
                 btn.canAfford = Player.canAfford(player, btn.sector.unlock_cost, 0)
 
                 -- Save player progress
-                local success, error = Save.write(player)
-                if not success then
-                    print("Failed to save player data:", error)
-                end
+                Save.write(player)
             else
                 -- Cannot afford (could show error message)
-                print("Cannot afford to unlock!")
             end
         end
     end
@@ -462,7 +447,6 @@ function MapScreen.mousepressed(x, y, button)
                     changeState(gameStates.MINING, btn.sectorId)
                 else
                     -- Not enough fuel (could show error message)
-                    print("Not enough fuel!")
                 end
             else
                 -- Try to unlock sector
@@ -474,13 +458,9 @@ function MapScreen.mousepressed(x, y, button)
                     btn.canAfford = Player.canAfford(player, btn.sector.unlock_cost, 0)
 
                     -- Save player progress
-                    local success, error = Save.write(player)
-                    if not success then
-                        print("Failed to save player data:", error)
-                    end
+                    Save.write(player)
                 else
                     -- Cannot afford (could show error message)
-                    print("Cannot afford to unlock!")
                 end
             end
         end

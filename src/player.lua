@@ -135,14 +135,6 @@ end
 function Player.refuel(player)
     local cost, fuelGained = Player.calculateRefuelCost(player)
 
-    -- Debug output
-    print("=== REFUEL DEBUG ===")
-    print("fuelCapacityBonus:", player.stats.fuelCapacityBonus)
-    print("Current fuel:", player.currency.fuel)
-    print("Max fuel (calculated):", Player.getMaxFuel(player))
-    print("Fuel gained:", fuelGained)
-    print("Cost:", cost)
-
     if cost == 0 or fuelGained == 0 then
         return false, "Already at max fuel"
     end
@@ -154,9 +146,6 @@ function Player.refuel(player)
     -- Deduct gold and add fuel
     player.currency.gold = player.currency.gold - cost
     player.currency.fuel = Player.getMaxFuel(player)
-
-    print("New fuel after refuel:", player.currency.fuel)
-    print("===================")
 
     return true, "Refueled"
 end

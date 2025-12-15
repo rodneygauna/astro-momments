@@ -78,16 +78,10 @@ local function purchaseUpgrade()
 
     if success then
         -- Play purchase sound (TODO)
-        print("Purchased: " .. selectedUpgradeId)
-
         -- Save player progress
-        local saveSuccess, saveError = Save.write(player)
-        if not saveSuccess then
-            print("Failed to save player data:", saveError)
-        end
+        Save.write(player)
     else
         -- Play error sound (TODO)
-        print("Purchase failed: " .. message)
     end
 end
 
