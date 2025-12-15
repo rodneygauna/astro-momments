@@ -24,6 +24,8 @@ local farStars -- Background star layer (slow parallax)
 local nearStars -- Foreground star layer (fast parallax)
 local planetSprite -- Planet background image
 local planetPosition -- Planet position and scale data
+local moonSprite -- Moon background image
+local moonPosition -- Moon position and scale data
 
 -- Helper function to get asteroid types for current sector
 local function getSectorAsteroidTypes()
@@ -70,9 +72,38 @@ function MiningScreen.load(camera, playerData, states, stateChanger, sectorId)
         planetPosition = {
             x = playableArea.x + math.cos(angle) * distance,
             y = playableArea.y + math.sin(angle) * distance,
-            scale = 1.2 + math.random() * 0.8 -- Random scale between 1.2 and 2.0 for better visibility
+            scale = 1.2 + math.random() * 0.8, -- Random scale between 1.2 and 2.0 for better visibility
+            rotation = math.random() * 2 * math.pi -- Random rotation in radians (0 to 2π)
         }
     end
+
+    -- Load and position moon sprite (always present)
+    moonSprite = love.graphics.newImage("sprites/Moon.png")
+    moonSprite:setFilter("nearest", "nearest") -- Pixel art filter
+
+    -- Position moon relative to planet (or center if no planet) to create a pair
+    local moonBaseX, moonBaseY
+    if planetPosition then
+        -- Position moon near the planet
+        moonBaseX = planetPosition.x
+        moonBaseY = planetPosition.y
+    else
+        -- No planet, position moon relative to center
+        local baseAngle = math.random() * 2 * math.pi
+        local baseDistance = playableArea.radius * (1.0 + math.random() * 0.4)
+        moonBaseX = playableArea.x + math.cos(baseAngle) * baseDistance
+        moonBaseY = playableArea.y + math.sin(baseAngle) * baseDistance
+    end
+
+    -- Offset moon from its base position (planet or random center point)
+    local moonAngle = math.random() * 2 * math.pi
+    local moonOffset = 150 + math.random() * 100 -- Distance 150-250 pixels from planet/base
+    moonPosition = {
+        x = moonBaseX + math.cos(moonAngle) * moonOffset,
+        y = moonBaseY + math.sin(moonAngle) * moonOffset,
+        scale = 0.4 + math.random() * 1.0, -- Random scale between 0.4 and 1.4 for more variety
+        rotation = planetPosition and planetPosition.rotation or (math.random() * 2 * math.pi) -- Match planet rotation or random
+    }
 
     -- Generate parallax star field
     -- Far layer: smaller, dimmer stars across a larger area
@@ -226,14 +257,30 @@ function MiningScreen.draw()
         love.graphics.circle("fill", star.x - offsetX, star.y - offsetY, star.size)
     end
 
+    -- Draw moon sprite with subtle parallax (15% - slowest, furthest back)
+    if moonSprite and moonPosition then
+        local offsetX = (camX - centerX) * 0.15
+        local offsetY = (camY - centerY) * 0.15
+        love.graphics.setColor(1, 1, 1, 0.85) -- Slight transparency
+        local moonX = moonPosition.x - offsetX
+        local moonY = moonPosition.y - offsetY
+        local originX = moonSprite:getWidth() / 2
+        local originY = moonSprite:getHeight() / 2
+        love.graphics.draw(moonSprite, moonX, moonY, moonPosition.rotation, moonPosition.scale, moonPosition.scale,
+            originX, originY)
+    end
+
     -- Draw planet sprite with subtle parallax (20% - slower than stars)
     if planetSprite and planetPosition then
         local offsetX = (camX - centerX) * 0.2
         local offsetY = (camY - centerY) * 0.2
         love.graphics.setColor(1, 1, 1, 0.9) -- Slight transparency
-        local planetX = planetPosition.x - offsetX - (planetSprite:getWidth() * planetPosition.scale / 2)
-        local planetY = planetPosition.y - offsetY - (planetSprite:getHeight() * planetPosition.scale / 2)
-        love.graphics.draw(planetSprite, planetX, planetY, 0, planetPosition.scale, planetPosition.scale)
+        local planetX = planetPosition.x - offsetX
+        local planetY = planetPosition.y - offsetY
+        local originX = planetSprite:getWidth() / 2
+        local originY = planetSprite:getHeight() / 2
+        love.graphics.draw(planetSprite, planetX, planetY, planetPosition.rotation, planetPosition.scale,
+            planetPosition.scale, originX, originY)
     end
 
     -- Attach camera for world rendering
