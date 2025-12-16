@@ -12,7 +12,7 @@ Sector.definitions = {
         spawnRate = 1.0,
         unlock_cost = 0, -- Free sector to start with
         fuel_cost = 1, -- Fuel cost to travel to this sector
-        planetImage = "sprites/Planet-Green-Blue.png" -- Background planet sprite
+        planetImage = "sprites/planets/Planet-Green-Blue.png" -- Background planet sprite
     },
     sector_02 = {
         id = "sector_02",

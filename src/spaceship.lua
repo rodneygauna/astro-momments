@@ -3,7 +3,7 @@
 local Spaceship = {}
 
 -- Load spaceship sprite
-local spaceshipImage = love.graphics.newImage("sprites/Spaceship.png")
+local spaceshipImage = love.graphics.newImage("sprites/ships/Spaceship.png")
 spaceshipImage:setFilter("nearest", "nearest") -- Crisp pixel art
 
 -- Create a new spaceship

@@ -78,7 +78,7 @@ function MiningScreen.load(camera, playerData, states, stateChanger, sectorId)
     end
 
     -- Load and position moon sprite (always present)
-    moonSprite = love.graphics.newImage("sprites/Moon.png")
+    moonSprite = love.graphics.newImage("sprites/planets/Moon.png")
     moonSprite:setFilter("nearest", "nearest") -- Pixel art filter
 
     -- Position moon relative to planet (or center if no planet) to create a pair

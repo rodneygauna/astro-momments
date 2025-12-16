@@ -33,7 +33,7 @@ end
 -- Initialize menu
 function MenuScreen.load(gameStates, changeState)
     -- Load background image
-    backgroundImage = love.graphics.newImage("sprites/Nebula_God.png")
+    backgroundImage = love.graphics.newImage("sprites/background/Nebula_God.png")
     backgroundImage:setFilter("nearest", "nearest") -- Prevents blurriness when scaling
 
     menu = {}
