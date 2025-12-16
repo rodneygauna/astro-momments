@@ -8,6 +8,7 @@ local Upgrades = require("src.upgrades")
 -- Menu state
 local menu = {}
 local backgroundImage
+local buttonImages = {} -- Store button sprite images
 local confirmationDialog = {
     visible = false,
     selectedButton = 1 -- 1 = Yes, 2 = No
@@ -35,6 +36,12 @@ function MenuScreen.load(gameStates, changeState)
     -- Load background image
     backgroundImage = love.graphics.newImage("sprites/background/Nebula_God.png")
     backgroundImage:setFilter("nearest", "nearest") -- Prevents blurriness when scaling
+
+    -- Load button sprite images
+    buttonImages.newGame = love.graphics.newImage("sprites/buttons/NewGame_Btn.png")
+    buttonImages.newGame:setFilter("nearest", "nearest")
+    buttonImages.newGameHover = love.graphics.newImage("sprites/buttons/NewGame-Hover_Btn.png")
+    buttonImages.newGameHover:setFilter("nearest", "nearest")
 
     menu = {}
     menu.buttons = {{
@@ -141,26 +148,43 @@ function MenuScreen.draw()
         local buttonX = (love.graphics.getWidth() - menu.buttonWidth) / 2
         local buttonY = getButtonY(i, #menu.buttons)
 
-        -- Determine button color
-        if not button.enabled then
-            love.graphics.setColor(0.3, 0.3, 0.3) -- Disabled
-        elseif isMouseOverButton(i) or menu.selectedIndex == i then
-            love.graphics.setColor(0.7, 0.7, 1) -- Highlighted
+        -- Check if this is the New Game button and has sprite images
+        if button.action == "new_game" and buttonImages.newGame then
+            -- Use sprite-based button for New Game
+            local buttonImage = buttonImages.newGame
+            local isHovered = isMouseOverButton(i) or menu.selectedIndex == i
+
+            if isHovered and buttonImages.newGameHover then
+                buttonImage = buttonImages.newGameHover
+            end
+
+            -- Draw the button sprite
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.draw(buttonImage, buttonX, buttonY)
         else
-            love.graphics.setColor(0.5, 0.5, 0.5) -- Normal
+            -- Use original rectangle-based button for other buttons
+            -- Determine button color
+            if not button.enabled then
+                love.graphics.setColor(0.3, 0.3, 0.3) -- Disabled
+            elseif isMouseOverButton(i) or menu.selectedIndex == i then
+                love.graphics.setColor(0.7, 0.7, 1) -- Highlighted
+            else
+                love.graphics.setColor(0.5, 0.5, 0.5) -- Normal
+            end
+
+            -- Draw button background
+            love.graphics.rectangle("fill", buttonX, buttonY, menu.buttonWidth, menu.buttonHeight)
+
+            -- Draw button border
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.rectangle("line", buttonX, buttonY, menu.buttonWidth, menu.buttonHeight)
+
+            -- Draw button text
+            local textColor = button.enabled and {1, 1, 1} or {0.5, 0.5, 0.5}
+            love.graphics.setColor(textColor)
+            love.graphics.printf(button.text, buttonX, buttonY + (menu.buttonHeight - 20) / 2, menu.buttonWidth,
+                "center")
         end
-
-        -- Draw button background
-        love.graphics.rectangle("fill", buttonX, buttonY, menu.buttonWidth, menu.buttonHeight)
-
-        -- Draw button border
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.rectangle("line", buttonX, buttonY, menu.buttonWidth, menu.buttonHeight)
-
-        -- Draw button text
-        local textColor = button.enabled and {1, 1, 1} or {0.5, 0.5, 0.5}
-        love.graphics.setColor(textColor)
-        love.graphics.printf(button.text, buttonX, buttonY + (menu.buttonHeight - 20) / 2, menu.buttonWidth, "center")
     end
 
     -- Draw controls help
