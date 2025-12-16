@@ -31,55 +31,185 @@ local function isMouseOverButton(buttonIndex)
                menu.buttonHeight
 end
 
+-- Helper function: Draw a button (sprite-based or fallback rectangle)
+local function drawButton(button, buttonX, buttonY, isHovered)
+    local action = button.action
+    local normalImage = buttonImages[action]
+    local hoverImage = buttonImages[action .. "Hover"]
+
+    -- Use sprite-based button if images are available
+    if normalImage then
+        local buttonImage = (isHovered and hoverImage) or normalImage
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.draw(buttonImage, buttonX, buttonY)
+    else
+        -- Fallback to rectangle-based button
+        -- Determine button color
+        if not button.enabled then
+            love.graphics.setColor(0.3, 0.3, 0.3) -- Disabled
+        elseif isHovered then
+            love.graphics.setColor(0.7, 0.7, 1) -- Highlighted
+        else
+            love.graphics.setColor(0.5, 0.5, 0.5) -- Normal
+        end
+
+        -- Draw button background
+        love.graphics.rectangle("fill", buttonX, buttonY, menu.buttonWidth, menu.buttonHeight)
+
+        -- Draw button border
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.rectangle("line", buttonX, buttonY, menu.buttonWidth, menu.buttonHeight)
+
+        -- Draw button text
+        local textColor = button.enabled and {1, 1, 1} or {0.5, 0.5, 0.5}
+        love.graphics.setColor(textColor)
+        love.graphics.printf(button.text, buttonX, buttonY + (menu.buttonHeight - 20) / 2, menu.buttonWidth, "center")
+    end
+end
+
+-- Helper function: Rebuild button list based on current save state
+local function rebuildButtonList()
+    menu.buttons = {}
+
+    -- Add Continue button only if save file exists
+    if Save.exists() then
+        table.insert(menu.buttons, {
+            text = "Continue",
+            action = "continue",
+            enabled = true
+        })
+    end
+
+    -- Add remaining buttons
+    table.insert(menu.buttons, {
+        text = "New Game",
+        action = "new_game",
+        enabled = true
+    })
+    table.insert(menu.buttons, {
+        text = "Settings",
+        action = "settings",
+        enabled = true
+    })
+    table.insert(menu.buttons, {
+        text = "Credits",
+        action = "credits",
+        enabled = true
+    })
+    table.insert(menu.buttons, {
+        text = "Exit",
+        action = "exit",
+        enabled = true
+    })
+
+    -- Ensure selectedIndex is valid
+    if menu.selectedIndex > #menu.buttons then
+        menu.selectedIndex = 1
+    end
+
+    -- Start with first enabled button selected if current selection is invalid
+    if not menu.buttons[menu.selectedIndex] or not menu.buttons[menu.selectedIndex].enabled then
+        menu.selectedIndex = 1
+        for i, button in ipairs(menu.buttons) do
+            if button.enabled then
+                menu.selectedIndex = i
+                break
+            end
+        end
+    end
+end
+
 -- Initialize menu
 function MenuScreen.load(gameStates, changeState)
     -- Load background image
     backgroundImage = love.graphics.newImage("sprites/background/Nebula_God.png")
     backgroundImage:setFilter("nearest", "nearest") -- Prevents blurriness when scaling
 
+    -- Define button image paths
+    local continueBtn = "sprites/buttons/Continue_Btn.png"
+    local continueBtnHover = "sprites/buttons/Continue-Hover_Btn.png"
+    local newGameBtn = "sprites/buttons/NewGame_Btn.png"
+    local newGameBtnHover = "sprites/buttons/NewGame-Hover_Btn.png"
+    local settingsBtn = "sprites/buttons/Settings_Btn.png"
+    local settingsBtnHover = "sprites/buttons/Settings-Hover_Btn.png"
+    local creditsBtn = "sprites/buttons/Credits_Btn.png"
+    local creditsBtnHover = "sprites/buttons/Credits-Hover_Btn.png"
+    local exitBtn = "sprites/buttons/Exit_Btn.png"
+    local exitBtnHover = "sprites/buttons/Exit-Hover_Btn.png"
+
     -- Load button sprite images
-    buttonImages.newGame = love.graphics.newImage("sprites/buttons/NewGame_Btn.png")
-    buttonImages.newGame:setFilter("nearest", "nearest")
-    buttonImages.newGameHover = love.graphics.newImage("sprites/buttons/NewGame-Hover_Btn.png")
-    buttonImages.newGameHover:setFilter("nearest", "nearest")
+    buttonImages = {}
 
-    menu = {}
-    menu.buttons = {{
-        text = "Continue",
-        action = "continue",
-        enabled = Save.exists() -- Enable if save file exists
-    }, {
-        text = "New Game",
-        action = "new_game",
-        enabled = true
-    }, {
-        text = "Settings",
-        action = "settings",
-        enabled = true
-    }, {
-        text = "Credits",
-        action = "credits",
-        enabled = true
-    }, {
-        text = "Exit",
-        action = "exit",
-        enabled = true
-    }}
-
-    -- Start with first enabled button selected
-    menu.selectedIndex = 1
-    for i, button in ipairs(menu.buttons) do
-        if button.enabled then
-            menu.selectedIndex = i
-            break
+    -- Continue button
+    local success, image = pcall(love.graphics.newImage, continueBtn)
+    if success then
+        buttonImages.continue = image
+        buttonImages.continue:setFilter("nearest", "nearest")
+        success, image = pcall(love.graphics.newImage, continueBtnHover)
+        if success then
+            buttonImages.continueHover = image
+            buttonImages.continueHover:setFilter("nearest", "nearest")
         end
     end
 
+    -- New Game button
+    success, image = pcall(love.graphics.newImage, newGameBtn)
+    if success then
+        buttonImages.new_game = image
+        buttonImages.new_game:setFilter("nearest", "nearest")
+        success, image = pcall(love.graphics.newImage, newGameBtnHover)
+        if success then
+            buttonImages.new_gameHover = image
+            buttonImages.new_gameHover:setFilter("nearest", "nearest")
+        end
+    end
+
+    -- Settings button
+    success, image = pcall(love.graphics.newImage, settingsBtn)
+    if success then
+        buttonImages.settings = image
+        buttonImages.settings:setFilter("nearest", "nearest")
+        success, image = pcall(love.graphics.newImage, settingsBtnHover)
+        if success then
+            buttonImages.settingsHover = image
+            buttonImages.settingsHover:setFilter("nearest", "nearest")
+        end
+    end
+
+    -- Credits button
+    success, image = pcall(love.graphics.newImage, creditsBtn)
+    if success then
+        buttonImages.credits = image
+        buttonImages.credits:setFilter("nearest", "nearest")
+        success, image = pcall(love.graphics.newImage, creditsBtnHover)
+        if success then
+            buttonImages.creditsHover = image
+            buttonImages.creditsHover:setFilter("nearest", "nearest")
+        end
+    end
+
+    -- Exit button
+    success, image = pcall(love.graphics.newImage, exitBtn)
+    if success then
+        buttonImages.exit = image
+        buttonImages.exit:setFilter("nearest", "nearest")
+        success, image = pcall(love.graphics.newImage, exitBtnHover)
+        if success then
+            buttonImages.exitHover = image
+            buttonImages.exitHover:setFilter("nearest", "nearest")
+        end
+    end
+
+    menu = {}
     menu.buttonHeight = 50
     menu.buttonWidth = 200
     menu.buttonSpacing = 10
     menu.gameStates = gameStates
     menu.changeState = changeState
+    menu.selectedIndex = 1
+
+    -- Build initial button list
+    rebuildButtonList()
 end
 
 -- Handle menu button action
@@ -124,6 +254,18 @@ function MenuScreen.update(dt)
     -- Future: Add menu animations, background effects, etc.
 end
 
+-- Called when entering the menu screen for the first time
+function MenuScreen.enter()
+    -- Rebuild button list to reflect current save state
+    rebuildButtonList()
+end
+
+-- Called when returning to the menu screen from another state
+function MenuScreen.resume()
+    -- Rebuild button list to reflect current save state
+    rebuildButtonList()
+end
+
 -- Draw menu
 function MenuScreen.draw()
     -- Draw background image (scaled to fit screen)
@@ -147,44 +289,9 @@ function MenuScreen.draw()
     for i, button in ipairs(menu.buttons) do
         local buttonX = (love.graphics.getWidth() - menu.buttonWidth) / 2
         local buttonY = getButtonY(i, #menu.buttons)
+        local isHovered = isMouseOverButton(i) or menu.selectedIndex == i
 
-        -- Check if this is the New Game button and has sprite images
-        if button.action == "new_game" and buttonImages.newGame then
-            -- Use sprite-based button for New Game
-            local buttonImage = buttonImages.newGame
-            local isHovered = isMouseOverButton(i) or menu.selectedIndex == i
-
-            if isHovered and buttonImages.newGameHover then
-                buttonImage = buttonImages.newGameHover
-            end
-
-            -- Draw the button sprite
-            love.graphics.setColor(1, 1, 1)
-            love.graphics.draw(buttonImage, buttonX, buttonY)
-        else
-            -- Use original rectangle-based button for other buttons
-            -- Determine button color
-            if not button.enabled then
-                love.graphics.setColor(0.3, 0.3, 0.3) -- Disabled
-            elseif isMouseOverButton(i) or menu.selectedIndex == i then
-                love.graphics.setColor(0.7, 0.7, 1) -- Highlighted
-            else
-                love.graphics.setColor(0.5, 0.5, 0.5) -- Normal
-            end
-
-            -- Draw button background
-            love.graphics.rectangle("fill", buttonX, buttonY, menu.buttonWidth, menu.buttonHeight)
-
-            -- Draw button border
-            love.graphics.setColor(1, 1, 1)
-            love.graphics.rectangle("line", buttonX, buttonY, menu.buttonWidth, menu.buttonHeight)
-
-            -- Draw button text
-            local textColor = button.enabled and {1, 1, 1} or {0.5, 0.5, 0.5}
-            love.graphics.setColor(textColor)
-            love.graphics.printf(button.text, buttonX, buttonY + (menu.buttonHeight - 20) / 2, menu.buttonWidth,
-                "center")
-        end
+        drawButton(button, buttonX, buttonY, isHovered)
     end
 
     -- Draw controls help
