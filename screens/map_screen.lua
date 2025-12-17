@@ -18,6 +18,8 @@ local refuelButton
 local scrollOffset
 local maxVisibleSectors
 local selectedIndex
+local sectorButtonNormalImage
+local sectorButtonHoverImage
 
 -- Initialize map screen
 function MapScreen.load(playerData, states, stateChanger)
@@ -27,6 +29,12 @@ function MapScreen.load(playerData, states, stateChanger)
 
     -- Ensure upgrade effects are applied to player stats
     Upgrades.applyUpgradeEffects(player)
+
+    -- Load sector button images
+    sectorButtonNormalImage = love.graphics.newImage("sprites/buttons/Btn_500x60.png")
+    sectorButtonNormalImage:setFilter("nearest", "nearest")
+    sectorButtonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_500x60.png")
+    sectorButtonHoverImage:setFilter("nearest", "nearest")
 
     hoveredButton = nil
     scrollOffset = 0
@@ -213,47 +221,22 @@ function MapScreen.draw()
         local startY = 120
         button.y = startY + ((i - scrollOffset - 1) * (buttonHeight + buttonSpacing))
 
-        -- Determine button color based on state
-        local bgColor, textColor
+        -- Draw button sprite
+        local buttonImage = isHovered and sectorButtonHoverImage or sectorButtonNormalImage
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.draw(buttonImage, button.x, button.y)
+
+        -- Determine text color based on state
+        local textColor
         if button.isUnlocked then
-            -- Unlocked sector
-            if isHovered then
-                bgColor = {0.3, 0.5, 0.8}
-            else
-                bgColor = {0.2, 0.4, 0.7}
-            end
             textColor = {1, 1, 1}
         else
-            -- Locked sector
             if button.canAfford then
-                -- Can afford to unlock
-                if isHovered then
-                    bgColor = {0.5, 0.5, 0.3}
-                else
-                    bgColor = {0.4, 0.4, 0.2}
-                end
                 textColor = {1, 1, 0.7}
             else
-                -- Cannot afford
-                bgColor = {0.2, 0.2, 0.2}
                 textColor = {0.5, 0.5, 0.5}
             end
         end
-
-        -- Draw button background
-        love.graphics.setColor(bgColor)
-        love.graphics.rectangle("fill", button.x, button.y, button.width, button.height, 5, 5)
-
-        -- Draw button border
-        if isHovered then
-            love.graphics.setColor(1, 1, 1)
-            love.graphics.setLineWidth(3)
-        else
-            love.graphics.setColor(0.5, 0.5, 0.5)
-            love.graphics.setLineWidth(1)
-        end
-        love.graphics.rectangle("line", button.x, button.y, button.width, button.height, 5, 5)
-        love.graphics.setLineWidth(1)
 
         -- Draw sector name
         love.graphics.setColor(textColor)
