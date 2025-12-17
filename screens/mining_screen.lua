@@ -26,6 +26,17 @@ local planetSprite -- Planet background image
 local planetPosition -- Planet position and scale data
 local moonSprite -- Moon background image
 local moonPosition -- Moon position and scale data
+local fuelCostForThisSector = 0 -- Track fuel cost for refund if player quits early
+
+-- Pause overlay state
+local isPaused = false
+local pausePromptImage
+local pauseButtonNormalImage
+local pauseButtonHoverImage
+local pauseMenu = {
+    selectedButton = 1,
+    buttons = {}
+}
 
 -- Helper function to get asteroid types for current sector
 local function getSectorAsteroidTypes()
@@ -42,15 +53,108 @@ local function getSectorAsteroidTypes()
     return allowedTypes
 end
 
+-- Helper function: Check if mouse is over a pause button
+local function isMouseOverPauseButton(buttonIndex)
+    local mouseX, mouseY = love.mouse.getPosition()
+    local button = pauseMenu.buttons[buttonIndex]
+    if not button then
+        return false
+    end
+
+    return mouseX >= button.x and mouseX <= button.x + button.width and mouseY >= button.y and mouseY <= button.y +
+               button.height
+end
+
+-- Helper function: Setup pause menu buttons
+local function setupPauseMenu()
+    local dialogWidth = 650
+    local dialogHeight = 450
+    local dialogX = (love.graphics.getWidth() - dialogWidth) / 2
+    local dialogY = (love.graphics.getHeight() - dialogHeight) / 2
+
+    local buttonWidth = 200
+    local buttonHeight = 50
+
+    local resumeY = dialogY + 100
+    local stopButtonY = dialogY + dialogHeight - 180
+    local exitButtonY = dialogY + dialogHeight - 115
+    local buttonX = dialogX + (dialogWidth - buttonWidth) / 2
+
+    pauseMenu.buttons = {{
+        text = "Resume Game",
+        action = "resume",
+        x = buttonX,
+        y = resumeY,
+        width = buttonWidth,
+        height = buttonHeight
+    }, {
+        text = "Stop Mining",
+        action = "stop_mining",
+        x = buttonX,
+        y = stopButtonY,
+        width = buttonWidth,
+        height = buttonHeight
+    }, {
+        text = "Exit Game",
+        action = "exit_game",
+        x = buttonX,
+        y = exitButtonY,
+        width = buttonWidth,
+        height = buttonHeight
+    }}
+end
+
+-- Helper function: Handle pause menu action
+local function handlePauseAction(action)
+    if action == "resume" then
+        isPaused = false
+    elseif action == "stop_mining" then
+        -- Refund fuel and return to map
+        if fuelCostForThisSector > 0 then
+            player.currency.fuel = player.currency.fuel + fuelCostForThisSector
+        end
+        local Save = require("src.save")
+        Save.write(player)
+        changeState(gameStates.MAP_SELECTION, player)
+    elseif action == "exit_game" then
+        -- Refund fuel before exiting
+        if fuelCostForThisSector > 0 then
+            player.currency.fuel = player.currency.fuel + fuelCostForThisSector
+        end
+        local Save = require("src.save")
+        Save.write(player)
+        love.event.quit()
+    end
+end
+
 -- Initialize mining screen
-function MiningScreen.load(camera, playerData, states, stateChanger, sectorId)
+function MiningScreen.load(camera, playerData, states, stateChanger, sectorId, fuelCost)
     cam = camera
     player = playerData
     gameStates = states
     changeState = stateChanger
     currentSector = Sector.definitions[sectorId] or Sector.definitions["sector_01"]
+    fuelCostForThisSector = fuelCost or 0 -- Store the fuel cost for potential refund
+    isPaused = false -- Reset pause state
     maxTime = 30 + (player.stats.missionTimeBonus or 0) -- Base time + mission time bonus
     timeLeft = maxTime
+
+    -- Load pause overlay images
+    if not pausePromptImage then
+        pausePromptImage = love.graphics.newImage("sprites/prompts/ConfirmationPrompt_650x450.png")
+        pausePromptImage:setFilter("nearest", "nearest")
+    end
+    if not pauseButtonNormalImage then
+        pauseButtonNormalImage = love.graphics.newImage("sprites/buttons/Btn_200x50.png")
+        pauseButtonNormalImage:setFilter("nearest", "nearest")
+    end
+    if not pauseButtonHoverImage then
+        pauseButtonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_200x50.png")
+        pauseButtonHoverImage:setFilter("nearest", "nearest")
+    end
+
+    -- Setup pause menu buttons
+    setupPauseMenu()
 
     -- Set the playable area size (circle)
     playableArea = {}
@@ -190,6 +294,11 @@ end
 
 -- Update mining screen
 function MiningScreen.update(dt)
+    -- Don't update game logic if paused
+    if isPaused then
+        return
+    end
+
     -- Check if cargo is full
     if Spaceship.isCargoFull(spaceship) then
         changeState(gameStates.CASHOUT, currentSector, {
@@ -313,12 +422,97 @@ function MiningScreen.draw()
 
     -- Draw gold (top left)
     love.graphics.print("Gold: " .. player.currency.gold, 10, 10)
+
+    -- Draw pause overlay if paused
+    if isPaused then
+        -- Draw semi-transparent overlay
+        love.graphics.setColor(0, 0, 0, 0.7)
+        love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+
+        -- Dialog box dimensions
+        local dialogWidth = 650
+        local dialogHeight = 450
+        local dialogX = (love.graphics.getWidth() - dialogWidth) / 2
+        local dialogY = (love.graphics.getHeight() - dialogHeight) / 2
+
+        -- Draw pause prompt image
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.draw(pausePromptImage, dialogX, dialogY)
+
+        -- Draw title
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.setFont(GameFonts.large)
+        love.graphics.printf("Game Paused", dialogX, dialogY + 30, dialogWidth, "center")
+
+        -- Draw warning text
+        love.graphics.setFont(GameFonts.small)
+        love.graphics.setColor(1, 0.7, 0.7)
+        love.graphics.printf("Stopping mining or exiting will not save", dialogX + 20, dialogY + 210, dialogWidth - 40,
+            "center")
+        love.graphics.printf("any progress for this sector.", dialogX + 20, dialogY + 230, dialogWidth - 40, "center")
+
+        -- Draw buttons
+        for i, button in ipairs(pauseMenu.buttons) do
+            local isHovered = (i == pauseMenu.selectedButton) or isMouseOverPauseButton(i)
+            local buttonImage = isHovered and pauseButtonHoverImage or pauseButtonNormalImage
+
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.draw(buttonImage, button.x, button.y)
+
+            -- Draw button text
+            love.graphics.setFont(GameFonts.medium)
+            love.graphics.printf(button.text, button.x, button.y + 15, button.width, "center")
+        end
+
+        -- Draw controls hint
+        love.graphics.setColor(0.7, 0.7, 0.7)
+        love.graphics.setFont(GameFonts.small)
+        love.graphics.printf("[ESC or P] Resume  [CLICK] Select", dialogX, dialogY + dialogHeight - 35, dialogWidth,
+            "center")
+    end
 end
 
 -- Handle keyboard input
 function MiningScreen.keypressed(key)
-    if key == "escape" then
-        changeState(gameStates.PAUSED)
+    if isPaused then
+        -- Handle pause menu input
+        if key == "escape" or key == "p" then
+            isPaused = false
+        elseif key == "up" or key == "w" then
+            pauseMenu.selectedButton = pauseMenu.selectedButton - 1
+            if pauseMenu.selectedButton < 1 then
+                pauseMenu.selectedButton = #pauseMenu.buttons
+            end
+        elseif key == "down" or key == "s" then
+            pauseMenu.selectedButton = pauseMenu.selectedButton + 1
+            if pauseMenu.selectedButton > #pauseMenu.buttons then
+                pauseMenu.selectedButton = 1
+            end
+        elseif key == "return" or key == "space" then
+            local button = pauseMenu.buttons[pauseMenu.selectedButton]
+            if button then
+                handlePauseAction(button.action)
+            end
+        end
+    else
+        -- Normal gameplay input
+        if key == "escape" or key == "p" then
+            isPaused = true
+            pauseMenu.selectedButton = 1
+        end
+    end
+end
+
+-- Handle mouse input
+function MiningScreen.mousepressed(x, y, button)
+    if isPaused and button == 1 then
+        -- Check which pause button was clicked
+        for i, btn in ipairs(pauseMenu.buttons) do
+            if isMouseOverPauseButton(i) then
+                handlePauseAction(btn.action)
+                break
+            end
+        end
     end
 end
 

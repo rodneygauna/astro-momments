@@ -358,7 +358,7 @@ function MapScreen.keypressed(key)
             if player.currency.fuel >= actualFuelCost then
                 -- Deduct fuel and start mining
                 Player.purchase(player, 0, actualFuelCost)
-                changeState(gameStates.MINING, btn.sectorId)
+                changeState(gameStates.MINING, btn.sectorId, actualFuelCost)
             else
                 -- Not enough fuel (could show error message)
             end
@@ -434,7 +434,7 @@ function MapScreen.mousepressed(x, y, button)
                 if player.currency.fuel >= actualFuelCost then
                     -- Deduct fuel and start mining
                     Player.purchase(player, 0, actualFuelCost)
-                    changeState(gameStates.MINING, btn.sectorId)
+                    changeState(gameStates.MINING, btn.sectorId, actualFuelCost)
                 else
                     -- Not enough fuel (could show error message)
                 end

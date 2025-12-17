@@ -41,8 +41,8 @@ local function changeGameState(newState, ...)
     if newState == gameStates.MENU then
         currentScreen = MenuScreen
     elseif newState == gameStates.MINING then
-        local sectorId = ...
-        MiningScreen.load(cam, player, gameStates, changeGameState, sectorId)
+        local sectorId, fuelCost = ...
+        MiningScreen.load(cam, player, gameStates, changeGameState, sectorId, fuelCost)
         currentScreen = MiningScreen
     elseif newState == gameStates.CASHOUT then
         local sector, cargo = ...
@@ -55,9 +55,6 @@ local function changeGameState(newState, ...)
         end
         MapScreen.load(player, gameStates, changeGameState)
         currentScreen = MapScreen
-    elseif newState == gameStates.PAUSED then
-        -- TODO: Load paused screen
-        currentScreen = nil
     elseif newState == gameStates.SETTINGS then
         -- TODO: Load settings screen
         currentScreen = nil
