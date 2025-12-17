@@ -106,13 +106,11 @@ function UpgradeScreen.draw()
 
     -- Draw title
     love.graphics.setColor(1, 1, 1)
-    local titleFont = love.graphics.newFont(36)
-    love.graphics.setFont(titleFont)
+    love.graphics.setFont(GameFonts.title)
     love.graphics.printf("UPGRADE STATION", 0, 30, screenWidth, "center")
 
     -- Draw player currency
-    local defaultFont = love.graphics.newFont(18)
-    love.graphics.setFont(defaultFont)
+    love.graphics.setFont(GameFonts.large)
     love.graphics.setColor(1, 0.9, 0.3)
     love.graphics.printf("Gold: " .. player.currency.gold, 0, 80, screenWidth, "center")
 

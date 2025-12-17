@@ -177,9 +177,9 @@ function MapScreen.draw()
     love.graphics.setColor(buttonColor)
     love.graphics.rectangle("fill", refuelButton.x, refuelButton.y, refuelButton.width, refuelButton.height, 5, 5)
     love.graphics.setColor(textColor)
-    love.graphics.setFont(love.graphics.newFont(14))
+    love.graphics.setFont(GameFonts.normal)
     love.graphics.printf(buttonText, refuelButton.x, refuelButton.y + 18, refuelButton.width, "center")
-    love.graphics.setFont(love.graphics.newFont(16))
+    love.graphics.setFont(GameFonts.medium)
 
     -- Draw gold display next to upgrade button
     love.graphics.setColor(1, 0.9, 0.3)
@@ -309,7 +309,7 @@ function MapScreen.draw()
 
     -- Draw instructions
     love.graphics.setColor(0.7, 0.7, 0.7)
-    love.graphics.setFont(love.graphics.newFont(14))
+    love.graphics.setFont(GameFonts.normal)
     love.graphics.printf("[W/S or UP/DOWN] Navigate  [ENTER/SPACE] Select  [U] Upgrades  [R] Refuel  [ESC] Menu", 0,
         love.graphics.getHeight() - 40, love.graphics.getWidth(), "center")
 end

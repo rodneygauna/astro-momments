@@ -137,7 +137,7 @@ function BuffSelectionScreen.draw()
 
     -- Draw instructions
     love.graphics.setColor(0.7, 0.7, 0.7)
-    love.graphics.setFont(love.graphics.newFont(14))
+    love.graphics.setFont(GameFonts.normal)
     love.graphics.printf("[W/S or UP/DOWN] Navigate  [ENTER/SPACE or CLICK] Select  [ESC] Back", 0,
         love.graphics.getHeight() - 50, love.graphics.getWidth(), "center")
 end

@@ -106,13 +106,16 @@ function CashoutScreen.draw()
 
     -- Draw title
     love.graphics.setColor(1, 1, 1)
+    love.graphics.setFont(GameFonts.title)
     love.graphics.printf("CASHOUT", panelX, panelY + 20, panelWidth, "center")
 
     -- Draw sector name
+    love.graphics.setFont(GameFonts.large)
     love.graphics.setColor(0.7, 0.7, 0.9)
     love.graphics.printf(sectorName, panelX, panelY + 50, panelWidth, "center")
 
     -- Draw cargo info
+    love.graphics.setFont(GameFonts.medium)
     love.graphics.setColor(1, 1, 1)
     love.graphics.printf("Cargo: " .. cargoUsed .. " / " .. cargoMax, panelX, panelY + 80, panelWidth, "center")
 
@@ -121,6 +124,7 @@ function CashoutScreen.draw()
     love.graphics.line(panelX + 50, panelY + 110, panelX + panelWidth - 50, panelY + 110)
 
     -- Draw materials header
+    love.graphics.setFont(GameFonts.normal)
     love.graphics.setColor(0.8, 0.8, 0.8)
     local headerY = panelY + 130
     love.graphics.printf("Material", panelX + 50, headerY, 200, "left")
@@ -154,6 +158,7 @@ function CashoutScreen.draw()
 
     -- Always show base value if any multipliers are active
     if valueMultiplier > 1.0 or goldMultiplier > 1.0 or emergencyPenalty < 1.0 then
+        love.graphics.setFont(GameFonts.normal)
         love.graphics.setColor(0.7, 0.7, 0.7)
         love.graphics.printf("Base Value:", panelX + 50, multiplierY, 300, "left")
         love.graphics.printf(tostring(baseValue) .. " Gold", panelX + 350, multiplierY, 200, "right")
@@ -191,11 +196,13 @@ function CashoutScreen.draw()
     end
 
     -- Draw total value
+    love.graphics.setFont(GameFonts.large)
     love.graphics.setColor(1, 0.8, 0)
     love.graphics.printf("TOTAL EARNED:", panelX + 50, multiplierY, 300, "left")
     love.graphics.printf(tostring(totalValue) .. " Gold", panelX + 350, multiplierY, 200, "right")
 
     -- Draw continue prompt
+    love.graphics.setFont(GameFonts.normal)
     love.graphics.setColor(0.7, 0.7, 0.7)
     love.graphics.printf("Press SPACE or ENTER to continue", panelX, panelY + panelHeight - 40, panelWidth, "center")
 end

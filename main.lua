@@ -11,6 +11,9 @@ local BuffSelectionScreen = require("screens/buff_selection_screen")
 local UpgradeScreen = require("screens/upgrade_screen")
 local cameraFile = require("libs/hump/camera")
 
+-- Global game fonts (will be initialized in love.load() and accessible to all screens)
+GameFonts = {}
+
 -- Global game state
 local player
 local cam
@@ -74,6 +77,17 @@ end
 function love.load()
     -- Set random seed
     math.randomseed(os.time())
+
+    -- Load custom fonts in various sizes (accessible globally as GameFonts)
+    GameFonts.small = love.graphics.newFont("fonts/prstartk.ttf", 12)
+    GameFonts.normal = love.graphics.newFont("fonts/prstartk.ttf", 14)
+    GameFonts.medium = love.graphics.newFont("fonts/prstartk.ttf", 16)
+    GameFonts.large = love.graphics.newFont("fonts/prstartk.ttf", 20)
+    GameFonts.title = love.graphics.newFont("fonts/prstartk.ttf", 36)
+    GameFonts.huge = love.graphics.newFont("fonts/prstartk.ttf", 48)
+
+    -- Set default font
+    love.graphics.setFont(GameFonts.medium)
 
     -- Initialize player
     player = Player.new()

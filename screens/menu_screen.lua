@@ -278,12 +278,11 @@ function MenuScreen.draw()
 
     -- Draw title
     love.graphics.setColor(1, 1, 1)
-    local titleFont = love.graphics.newFont(48)
-    love.graphics.setFont(titleFont)
+    love.graphics.setFont(GameFonts.huge)
     love.graphics.printf("Astro Moments", 0, 100, love.graphics.getWidth(), "center")
 
     -- Reset to default font for buttons
-    love.graphics.setFont(love.graphics.newFont(20))
+    love.graphics.setFont(GameFonts.large)
 
     -- Draw buttons
     for i, button in ipairs(menu.buttons) do
@@ -296,7 +295,7 @@ function MenuScreen.draw()
 
     -- Draw controls help
     love.graphics.setColor(0.7, 0.7, 0.7)
-    love.graphics.setFont(love.graphics.newFont(14))
+    love.graphics.setFont(GameFonts.normal)
     local controlsY = love.graphics.getHeight() - 50
     love.graphics.printf("[W/S or UP/DOWN] Navigate  [ENTER/SPACE or CLICK] Select  [ESC] Quit", 0, controlsY,
         love.graphics.getWidth(), "center")
@@ -325,10 +324,10 @@ function MenuScreen.draw()
 
         -- Draw warning message
         love.graphics.setColor(1, 1, 1)
-        love.graphics.setFont(love.graphics.newFont(20))
+        love.graphics.setFont(GameFonts.large)
         love.graphics.printf("Start New Game?", dialogX, dialogY + 20, dialogWidth, "center")
 
-        love.graphics.setFont(love.graphics.newFont(16))
+        love.graphics.setFont(GameFonts.medium)
         love.graphics.setColor(1, 0.7, 0.7)
         love.graphics.printf("Your current save file will be deleted.", dialogX + 20, dialogY + 60, dialogWidth - 40,
             "center")
@@ -367,7 +366,7 @@ function MenuScreen.draw()
 
         -- Draw dialog controls hint
         love.graphics.setColor(0.7, 0.7, 0.7)
-        love.graphics.setFont(love.graphics.newFont(12))
+        love.graphics.setFont(GameFonts.small)
         love.graphics.printf("[LEFT/RIGHT or A/D] Choose  [ENTER/SPACE] Confirm", dialogX, dialogY + dialogHeight - 20,
             dialogWidth, "center")
     end
