@@ -20,6 +20,10 @@ local maxVisibleSectors
 local selectedIndex
 local sectorButtonNormalImage
 local sectorButtonHoverImage
+local refuelButtonNormalImage
+local refuelButtonHoverImage
+local upgradeButtonNormalImage
+local upgradeButtonHoverImage
 
 -- Initialize map screen
 function MapScreen.load(playerData, states, stateChanger)
@@ -35,6 +39,18 @@ function MapScreen.load(playerData, states, stateChanger)
     sectorButtonNormalImage:setFilter("nearest", "nearest")
     sectorButtonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_500x60.png")
     sectorButtonHoverImage:setFilter("nearest", "nearest")
+
+    -- Load refuel button images
+    refuelButtonNormalImage = love.graphics.newImage("sprites/buttons/Btn_200x50.png")
+    refuelButtonNormalImage:setFilter("nearest", "nearest")
+    refuelButtonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_200x50.png")
+    refuelButtonHoverImage:setFilter("nearest", "nearest")
+
+    -- Load upgrade button images
+    upgradeButtonNormalImage = love.graphics.newImage("sprites/buttons/Btn_150x50.png")
+    upgradeButtonNormalImage:setFilter("nearest", "nearest")
+    upgradeButtonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_150x50.png")
+    upgradeButtonHoverImage:setFilter("nearest", "nearest")
 
     hoveredButton = nil
     scrollOffset = 0
@@ -134,13 +150,9 @@ function MapScreen.draw()
 
     -- Draw upgrade button
     local isUpgradeHovered = (hoveredButton == upgradeButton)
-    if isUpgradeHovered then
-        love.graphics.setColor(0.4, 0.6, 0.9)
-    else
-        love.graphics.setColor(0.3, 0.5, 0.8)
-    end
-    love.graphics.rectangle("fill", upgradeButton.x, upgradeButton.y, upgradeButton.width, upgradeButton.height, 5, 5)
+    local upgradeButtonImage = isUpgradeHovered and upgradeButtonHoverImage or upgradeButtonNormalImage
     love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(upgradeButtonImage, upgradeButton.x, upgradeButton.y)
     love.graphics.printf(upgradeButton.text, upgradeButton.x, upgradeButton.y + 15, upgradeButton.width, "center")
 
     -- Draw refuel button
@@ -150,43 +162,38 @@ function MapScreen.draw()
     local canRefuel = cost > 0 and fuelGained > 0 and player.currency.gold >= cost
 
     -- Determine button state and text
-    local buttonText, buttonColor, textColor
+    local buttonText, textColor
     if needsEmergency then
         -- Emergency beacon mode
         buttonText = "EMERGENCY BEACON"
-        if isRefuelHovered then
-            buttonColor = {0.9, 0.4, 0.4}
-        else
-            buttonColor = {0.8, 0.3, 0.3}
-        end
         textColor = {1, 1, 1}
     elseif fuelGained == 0 then
         -- Already at max fuel
         buttonText = "REFUEL (FULL)"
-        buttonColor = {0.3, 0.3, 0.3}
         textColor = {0.6, 0.6, 0.6}
     elseif player.currency.gold == 0 then
         -- No gold - show disabled
         buttonText = "Refuel (+" .. fuelGained .. "): " .. cost .. "g"
-        buttonColor = {0.3, 0.3, 0.3}
         textColor = {0.6, 0.6, 0.6}
     else
         -- Normal refuel mode
         buttonText = "Refuel (+" .. fuelGained .. "): " .. cost .. "g"
-        if isRefuelHovered then
-            buttonColor = {0.4, 0.7, 0.4}
-        else
-            buttonColor = {0.3, 0.6, 0.3}
-        end
         textColor = {1, 1, 1}
     end
 
-    -- Draw button
-    love.graphics.setColor(buttonColor)
-    love.graphics.rectangle("fill", refuelButton.x, refuelButton.y, refuelButton.width, refuelButton.height, 5, 5)
+    -- Draw button sprite
+    local refuelButtonImage = isRefuelHovered and refuelButtonHoverImage or refuelButtonNormalImage
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(refuelButtonImage, refuelButton.x, refuelButton.y)
+
+    -- Draw button text (vertically centered for multi-line text)
     love.graphics.setColor(textColor)
     love.graphics.setFont(GameFonts.normal)
-    love.graphics.printf(buttonText, refuelButton.x, refuelButton.y + 18, refuelButton.width, "center")
+    local font = love.graphics.getFont()
+    local _, wrappedText = font:getWrap(buttonText, refuelButton.width)
+    local textHeight = #wrappedText * font:getHeight()
+    local textY = refuelButton.y + (refuelButton.height - textHeight) / 2
+    love.graphics.printf(buttonText, refuelButton.x, textY, refuelButton.width, "center")
     love.graphics.setFont(GameFonts.medium)
 
     -- Draw gold display next to upgrade button
@@ -259,7 +266,7 @@ function MapScreen.draw()
         else
             -- Show unlock cost
             love.graphics.setColor(textColor[1] * 0.8, textColor[2] * 0.8, textColor[3] * 0.8)
-            love.graphics.printf("🔒 Unlock: " .. button.sector.unlock_cost .. " Gold", button.x + 10, button.y + 35,
+            love.graphics.printf("Unlock: " .. button.sector.unlock_cost .. " Gold", button.x + 10, button.y + 35,
                 button.width - 20, "left")
         end
     end

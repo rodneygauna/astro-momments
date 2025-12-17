@@ -91,7 +91,7 @@ function CashoutScreen.draw()
 
     -- Draw panel background
     local panelWidth = 600
-    local panelHeight = 500
+    local panelHeight = 550
     local panelX = (love.graphics.getWidth() - panelWidth) / 2
     local panelY = (love.graphics.getHeight() - panelHeight) / 2
 
@@ -112,21 +112,21 @@ function CashoutScreen.draw()
     -- Draw sector name
     love.graphics.setFont(GameFonts.large)
     love.graphics.setColor(0.7, 0.7, 0.9)
-    love.graphics.printf(sectorName, panelX, panelY + 50, panelWidth, "center")
+    love.graphics.printf(sectorName, panelX, panelY + 70, panelWidth, "center")
 
     -- Draw cargo info
     love.graphics.setFont(GameFonts.medium)
     love.graphics.setColor(1, 1, 1)
-    love.graphics.printf("Cargo: " .. cargoUsed .. " / " .. cargoMax, panelX, panelY + 80, panelWidth, "center")
+    love.graphics.printf("Cargo: " .. cargoUsed .. " / " .. cargoMax, panelX, panelY + 105, panelWidth, "center")
 
     -- Draw separator line
     love.graphics.setColor(0.5, 0.5, 0.7)
-    love.graphics.line(panelX + 50, panelY + 110, panelX + panelWidth - 50, panelY + 110)
+    love.graphics.line(panelX + 50, panelY + 135, panelX + panelWidth - 50, panelY + 135)
 
     -- Draw materials header
     love.graphics.setFont(GameFonts.normal)
     love.graphics.setColor(0.8, 0.8, 0.8)
-    local headerY = panelY + 130
+    local headerY = panelY + 155
     love.graphics.printf("Material", panelX + 50, headerY, 200, "left")
     love.graphics.printf("Qty", panelX + 250, headerY, 80, "center")
     love.graphics.printf("Value", panelX + 330, headerY, 80, "center")
@@ -192,7 +192,7 @@ function CashoutScreen.draw()
         -- Draw another separator
         love.graphics.setColor(0.5, 0.5, 0.7)
         love.graphics.line(panelX + 50, multiplierY + 5, panelX + panelWidth - 50, multiplierY + 5)
-        multiplierY = multiplierY + 15
+        multiplierY = multiplierY + 25
     end
 
     -- Draw total value
@@ -201,10 +201,11 @@ function CashoutScreen.draw()
     love.graphics.printf("TOTAL EARNED:", panelX + 50, multiplierY, 300, "left")
     love.graphics.printf(tostring(totalValue) .. " Gold", panelX + 350, multiplierY, 200, "right")
 
-    -- Draw continue prompt
+    -- Draw continue prompt (at bottom of screen, outside panel)
     love.graphics.setFont(GameFonts.normal)
     love.graphics.setColor(0.7, 0.7, 0.7)
-    love.graphics.printf("Press SPACE or ENTER to continue", panelX, panelY + panelHeight - 40, panelWidth, "center")
+    love.graphics.printf("Press SPACE or ENTER to continue", 0, love.graphics.getHeight() - 40,
+        love.graphics.getWidth(), "center")
 end
 
 -- Handle keyboard input
