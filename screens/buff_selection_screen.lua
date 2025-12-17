@@ -15,6 +15,8 @@ local selectionsRemaining
 local maxSelections
 local hoveredButton
 local selectedIndex
+local buffButtonNormalImage
+local buffButtonHoverImage
 
 -- Initialize buff selection screen
 function BuffSelectionScreen.load(playerData, states, stateChanger)
@@ -23,6 +25,12 @@ function BuffSelectionScreen.load(playerData, states, stateChanger)
     changeState = stateChanger
     hoveredButton = nil
     selectedIndex = 1
+
+    -- Load buff button images
+    buffButtonNormalImage = love.graphics.newImage("sprites/buttons/Btn_500x100.png")
+    buffButtonNormalImage:setFilter("nearest", "nearest")
+    buffButtonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_500x100.png")
+    buffButtonHoverImage:setFilter("nearest", "nearest")
 
     -- Initialize selection state
     maxSelections = 3
@@ -94,23 +102,14 @@ function BuffSelectionScreen.draw()
         -- Get rarity color
         local rarityColor = Buff.getRarityColor(buff.rarity)
 
-        -- Draw button background
+        -- Draw button sprite with rarity color tinting
+        local buttonImage = isHovered and buffButtonHoverImage or buffButtonNormalImage
         if isHovered then
-            love.graphics.setColor(rarityColor[1] * 0.6, rarityColor[2] * 0.6, rarityColor[3] * 0.6)
+            love.graphics.setColor(rarityColor[1], rarityColor[2], rarityColor[3])
         else
-            love.graphics.setColor(rarityColor[1] * 0.4, rarityColor[2] * 0.4, rarityColor[3] * 0.4)
+            love.graphics.setColor(rarityColor[1] * 0.7, rarityColor[2] * 0.7, rarityColor[3] * 0.7)
         end
-        love.graphics.rectangle("fill", buttonX, buttonY, buttonWidth, buttonHeight, 10, 10)
-
-        -- Draw button border
-        love.graphics.setColor(rarityColor)
-        if isHovered then
-            love.graphics.setLineWidth(4)
-        else
-            love.graphics.setLineWidth(2)
-        end
-        love.graphics.rectangle("line", buttonX, buttonY, buttonWidth, buttonHeight, 10, 10)
-        love.graphics.setLineWidth(1)
+        love.graphics.draw(buttonImage, buttonX, buttonY)
 
         -- Draw rarity badge
         love.graphics.setColor(rarityColor)
