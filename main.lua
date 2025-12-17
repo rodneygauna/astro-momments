@@ -9,6 +9,7 @@ local CashoutScreen = require("screens/cashout_screen")
 local MapScreen = require("screens/map_screen")
 local BuffSelectionScreen = require("screens/buff_selection_screen")
 local UpgradeScreen = require("screens/upgrade_screen")
+local CreditsScreen = require("screens/credits_screen")
 local cameraFile = require("libs/hump/camera")
 
 -- Global game fonts (will be initialized in love.load() and accessible to all screens)
@@ -59,8 +60,8 @@ local function changeGameState(newState, ...)
         -- TODO: Load settings screen
         currentScreen = nil
     elseif newState == gameStates.CREDITS then
-        -- TODO: Load credits screen
-        currentScreen = nil
+        CreditsScreen.load(gameStates, changeGameState)
+        currentScreen = CreditsScreen
     elseif newState == gameStates.SKILL_TREE then
         UpgradeScreen.load(player, gameStates, changeGameState)
         currentScreen = UpgradeScreen
@@ -140,9 +141,7 @@ function love.draw()
         elseif currentGameState == gameStates.SETTINGS then
             love.graphics.printf("Settings Screen (Not Implemented)\nPress ESC to return", 0,
                 love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
-        elseif currentGameState == gameStates.CREDITS then
-            love.graphics.printf("Credits Screen (Not Implemented)\nPress ESC to return", 0,
-                love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
+
         end
     end
 end
@@ -161,8 +160,6 @@ function love.keypressed(key)
         elseif currentGameState == gameStates.CASHOUT and key == "return" then
             changeGameState(gameStates.MAP_SELECTION)
         elseif currentGameState == gameStates.SETTINGS and key == "escape" then
-            changeGameState(gameStates.MENU)
-        elseif currentGameState == gameStates.CREDITS and key == "escape" then
             changeGameState(gameStates.MENU)
         end
     end
