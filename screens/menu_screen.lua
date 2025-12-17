@@ -8,7 +8,8 @@ local Upgrades = require("src.upgrades")
 -- Menu state
 local menu = {}
 local backgroundImage
-local buttonImages = {} -- Store button sprite images
+local buttonNormalImage
+local buttonHoverImage
 local confirmationDialog = {
     visible = false,
     selectedButton = 1 -- 1 = Yes, 2 = No
@@ -31,40 +32,18 @@ local function isMouseOverButton(buttonIndex)
                menu.buttonHeight
 end
 
--- Helper function: Draw a button (sprite-based or fallback rectangle)
+-- Helper function: Draw a button with generic sprite and text overlay
 local function drawButton(button, buttonX, buttonY, isHovered)
-    local action = button.action
-    local normalImage = buttonImages[action]
-    local hoverImage = buttonImages[action .. "Hover"]
+    -- Draw button sprite
+    local buttonImage = isHovered and buttonHoverImage or buttonNormalImage
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(buttonImage, buttonX, buttonY)
 
-    -- Use sprite-based button if images are available
-    if normalImage then
-        local buttonImage = (isHovered and hoverImage) or normalImage
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.draw(buttonImage, buttonX, buttonY)
-    else
-        -- Fallback to rectangle-based button
-        -- Determine button color
-        if not button.enabled then
-            love.graphics.setColor(0.3, 0.3, 0.3) -- Disabled
-        elseif isHovered then
-            love.graphics.setColor(0.7, 0.7, 1) -- Highlighted
-        else
-            love.graphics.setColor(0.5, 0.5, 0.5) -- Normal
-        end
-
-        -- Draw button background
-        love.graphics.rectangle("fill", buttonX, buttonY, menu.buttonWidth, menu.buttonHeight)
-
-        -- Draw button border
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.rectangle("line", buttonX, buttonY, menu.buttonWidth, menu.buttonHeight)
-
-        -- Draw button text
-        local textColor = button.enabled and {1, 1, 1} or {0.5, 0.5, 0.5}
-        love.graphics.setColor(textColor)
-        love.graphics.printf(button.text, buttonX, buttonY + (menu.buttonHeight - 20) / 2, menu.buttonWidth, "center")
-    end
+    -- Draw button text on top
+    love.graphics.setFont(GameFonts.medium)
+    local textColor = button.enabled and {1, 1, 1} or {0.5, 0.5, 0.5}
+    love.graphics.setColor(textColor)
+    love.graphics.printf(button.text, buttonX, buttonY + (menu.buttonHeight - 20) / 2, menu.buttonWidth, "center")
 end
 
 -- Helper function: Rebuild button list based on current save state
@@ -125,80 +104,11 @@ function MenuScreen.load(gameStates, changeState)
     backgroundImage = love.graphics.newImage("sprites/background/Nebula_God.png")
     backgroundImage:setFilter("nearest", "nearest") -- Prevents blurriness when scaling
 
-    -- Define button image paths
-    local continueBtn = "sprites/buttons/Continue_Btn.png"
-    local continueBtnHover = "sprites/buttons/Continue-Hover_Btn.png"
-    local newGameBtn = "sprites/buttons/NewGame_Btn.png"
-    local newGameBtnHover = "sprites/buttons/NewGame-Hover_Btn.png"
-    local settingsBtn = "sprites/buttons/Settings_Btn.png"
-    local settingsBtnHover = "sprites/buttons/Settings-Hover_Btn.png"
-    local creditsBtn = "sprites/buttons/Credits_Btn.png"
-    local creditsBtnHover = "sprites/buttons/Credits-Hover_Btn.png"
-    local exitBtn = "sprites/buttons/Exit_Btn.png"
-    local exitBtnHover = "sprites/buttons/Exit-Hover_Btn.png"
-
-    -- Load button sprite images
-    buttonImages = {}
-
-    -- Continue button
-    local success, image = pcall(love.graphics.newImage, continueBtn)
-    if success then
-        buttonImages.continue = image
-        buttonImages.continue:setFilter("nearest", "nearest")
-        success, image = pcall(love.graphics.newImage, continueBtnHover)
-        if success then
-            buttonImages.continueHover = image
-            buttonImages.continueHover:setFilter("nearest", "nearest")
-        end
-    end
-
-    -- New Game button
-    success, image = pcall(love.graphics.newImage, newGameBtn)
-    if success then
-        buttonImages.new_game = image
-        buttonImages.new_game:setFilter("nearest", "nearest")
-        success, image = pcall(love.graphics.newImage, newGameBtnHover)
-        if success then
-            buttonImages.new_gameHover = image
-            buttonImages.new_gameHover:setFilter("nearest", "nearest")
-        end
-    end
-
-    -- Settings button
-    success, image = pcall(love.graphics.newImage, settingsBtn)
-    if success then
-        buttonImages.settings = image
-        buttonImages.settings:setFilter("nearest", "nearest")
-        success, image = pcall(love.graphics.newImage, settingsBtnHover)
-        if success then
-            buttonImages.settingsHover = image
-            buttonImages.settingsHover:setFilter("nearest", "nearest")
-        end
-    end
-
-    -- Credits button
-    success, image = pcall(love.graphics.newImage, creditsBtn)
-    if success then
-        buttonImages.credits = image
-        buttonImages.credits:setFilter("nearest", "nearest")
-        success, image = pcall(love.graphics.newImage, creditsBtnHover)
-        if success then
-            buttonImages.creditsHover = image
-            buttonImages.creditsHover:setFilter("nearest", "nearest")
-        end
-    end
-
-    -- Exit button
-    success, image = pcall(love.graphics.newImage, exitBtn)
-    if success then
-        buttonImages.exit = image
-        buttonImages.exit:setFilter("nearest", "nearest")
-        success, image = pcall(love.graphics.newImage, exitBtnHover)
-        if success then
-            buttonImages.exitHover = image
-            buttonImages.exitHover:setFilter("nearest", "nearest")
-        end
-    end
+    -- Load generic button images
+    buttonNormalImage = love.graphics.newImage("sprites/buttons/Btn_200x50.png")
+    buttonNormalImage:setFilter("nearest", "nearest")
+    buttonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_200x50.png")
+    buttonHoverImage:setFilter("nearest", "nearest")
 
     menu = {}
     menu.buttonHeight = 50
