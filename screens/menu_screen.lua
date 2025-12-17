@@ -12,6 +12,7 @@ local buttonNormalImage
 local buttonHoverImage
 local dialogButtonNormalImage
 local dialogButtonHoverImage
+local confirmationPromptImage
 local confirmationDialog = {
     visible = false,
     selectedButton = 1 -- 1 = Yes, 2 = No
@@ -117,6 +118,10 @@ function MenuScreen.load(gameStates, changeState)
     dialogButtonNormalImage:setFilter("nearest", "nearest")
     dialogButtonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_150x50.png")
     dialogButtonHoverImage:setFilter("nearest", "nearest")
+
+    -- Load confirmation prompt image
+    confirmationPromptImage = love.graphics.newImage("sprites/prompts/ConfirmationPrompt_650x320.png")
+    confirmationPromptImage:setFilter("nearest", "nearest")
 
     menu = {}
     menu.buttonHeight = 50
@@ -230,15 +235,9 @@ function MenuScreen.draw()
         local dialogX = (love.graphics.getWidth() - dialogWidth) / 2
         local dialogY = (love.graphics.getHeight() - dialogHeight) / 2
 
-        -- Draw dialog background
-        love.graphics.setColor(0.15, 0.15, 0.2)
-        love.graphics.rectangle("fill", dialogX, dialogY, dialogWidth, dialogHeight, 10, 10)
-
-        -- Draw dialog border
-        love.graphics.setColor(0.7, 0.7, 0.8)
-        love.graphics.setLineWidth(3)
-        love.graphics.rectangle("line", dialogX, dialogY, dialogWidth, dialogHeight, 10, 10)
-        love.graphics.setLineWidth(1)
+        -- Draw confirmation prompt image
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.draw(confirmationPromptImage, dialogX, dialogY)
 
         -- Draw warning message
         love.graphics.setColor(1, 1, 1)
@@ -258,7 +257,7 @@ function MenuScreen.draw()
         local buttonSpacing = 20
         local yesButtonX = dialogX + (dialogWidth / 2) - buttonWidth - (buttonSpacing / 2)
         local noButtonX = dialogX + (dialogWidth / 2) + (buttonSpacing / 2)
-        local buttonY = dialogY + dialogHeight - 80
+        local buttonY = dialogY + dialogHeight - 110
 
         -- Yes button
         local yesButtonImage = (confirmationDialog.selectedButton == 1) and dialogButtonHoverImage or
@@ -277,7 +276,7 @@ function MenuScreen.draw()
         -- Draw dialog controls hint
         love.graphics.setColor(0.7, 0.7, 0.7)
         love.graphics.setFont(GameFonts.small)
-        love.graphics.printf("[LEFT/RIGHT or A/D] Choose  [ENTER/SPACE] Confirm", dialogX, dialogY + dialogHeight - 20,
+        love.graphics.printf("[LEFT/RIGHT or A/D] Choose  [ENTER/SPACE] Confirm", dialogX, dialogY + dialogHeight - 50,
             dialogWidth, "center")
     end
 end
