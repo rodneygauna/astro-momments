@@ -10,6 +10,8 @@ local menu = {}
 local backgroundImage
 local buttonNormalImage
 local buttonHoverImage
+local dialogButtonNormalImage
+local dialogButtonHoverImage
 local confirmationDialog = {
     visible = false,
     selectedButton = 1 -- 1 = Yes, 2 = No
@@ -109,6 +111,12 @@ function MenuScreen.load(gameStates, changeState)
     buttonNormalImage:setFilter("nearest", "nearest")
     buttonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_200x50.png")
     buttonHoverImage:setFilter("nearest", "nearest")
+
+    -- Load dialog button images (for Yes/No buttons)
+    dialogButtonNormalImage = love.graphics.newImage("sprites/buttons/Btn_150x50.png")
+    dialogButtonNormalImage:setFilter("nearest", "nearest")
+    dialogButtonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_150x50.png")
+    dialogButtonHoverImage:setFilter("nearest", "nearest")
 
     menu = {}
     menu.buttonHeight = 50
@@ -217,8 +225,8 @@ function MenuScreen.draw()
         love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
 
         -- Dialog box dimensions
-        local dialogWidth = 500
-        local dialogHeight = 200
+        local dialogWidth = 650
+        local dialogHeight = 320
         local dialogX = (love.graphics.getWidth() - dialogWidth) / 2
         local dialogY = (love.graphics.getHeight() - dialogHeight) / 2
 
@@ -235,44 +243,36 @@ function MenuScreen.draw()
         -- Draw warning message
         love.graphics.setColor(1, 1, 1)
         love.graphics.setFont(GameFonts.large)
-        love.graphics.printf("Start New Game?", dialogX, dialogY + 20, dialogWidth, "center")
+        love.graphics.printf("Start New Game?", dialogX, dialogY + 30, dialogWidth, "center")
 
         love.graphics.setFont(GameFonts.medium)
         love.graphics.setColor(1, 0.7, 0.7)
-        love.graphics.printf("Your current save file will be deleted.", dialogX + 20, dialogY + 60, dialogWidth - 40,
+        love.graphics.printf("Your current save file will be deleted.", dialogX + 20, dialogY + 80, dialogWidth - 40,
             "center")
         love.graphics.setColor(0.9, 0.9, 0.9)
-        love.graphics.printf("This action cannot be undone.", dialogX + 20, dialogY + 85, dialogWidth - 40, "center")
+        love.graphics.printf("This action cannot be undone.", dialogX + 20, dialogY + 115, dialogWidth - 40, "center")
 
         -- Draw Yes/No buttons
-        local buttonWidth = 120
-        local buttonHeight = 40
+        local buttonWidth = 150
+        local buttonHeight = 50
         local buttonSpacing = 20
         local yesButtonX = dialogX + (dialogWidth / 2) - buttonWidth - (buttonSpacing / 2)
         local noButtonX = dialogX + (dialogWidth / 2) + (buttonSpacing / 2)
-        local buttonY = dialogY + dialogHeight - 60
+        local buttonY = dialogY + dialogHeight - 80
 
         -- Yes button
-        if confirmationDialog.selectedButton == 1 then
-            love.graphics.setColor(0.8, 0.3, 0.3) -- Red when selected
-        else
-            love.graphics.setColor(0.5, 0.2, 0.2)
-        end
-        love.graphics.rectangle("fill", yesButtonX, buttonY, buttonWidth, buttonHeight, 5, 5)
+        local yesButtonImage = (confirmationDialog.selectedButton == 1) and dialogButtonHoverImage or
+                                   dialogButtonNormalImage
         love.graphics.setColor(1, 1, 1)
-        love.graphics.rectangle("line", yesButtonX, buttonY, buttonWidth, buttonHeight, 5, 5)
-        love.graphics.printf("Yes", yesButtonX, buttonY + 10, buttonWidth, "center")
+        love.graphics.draw(yesButtonImage, yesButtonX, buttonY)
+        love.graphics.printf("Yes", yesButtonX, buttonY + 15, buttonWidth, "center")
 
         -- No button
-        if confirmationDialog.selectedButton == 2 then
-            love.graphics.setColor(0.3, 0.6, 0.3) -- Green when selected
-        else
-            love.graphics.setColor(0.2, 0.4, 0.2)
-        end
-        love.graphics.rectangle("fill", noButtonX, buttonY, buttonWidth, buttonHeight, 5, 5)
+        local noButtonImage = (confirmationDialog.selectedButton == 2) and dialogButtonHoverImage or
+                                  dialogButtonNormalImage
         love.graphics.setColor(1, 1, 1)
-        love.graphics.rectangle("line", noButtonX, buttonY, buttonWidth, buttonHeight, 5, 5)
-        love.graphics.printf("No", noButtonX, buttonY + 10, buttonWidth, "center")
+        love.graphics.draw(noButtonImage, noButtonX, buttonY)
+        love.graphics.printf("No", noButtonX, buttonY + 15, buttonWidth, "center")
 
         -- Draw dialog controls hint
         love.graphics.setColor(0.7, 0.7, 0.7)
