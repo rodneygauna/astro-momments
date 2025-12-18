@@ -27,9 +27,9 @@ function BuffSelectionScreen.load(playerData, states, stateChanger)
     selectedIndex = 1
 
     -- Load buff button images
-    buffButtonNormalImage = love.graphics.newImage("sprites/buttons/Btn_500x100.png")
+    buffButtonNormalImage = love.graphics.newImage("sprites/buttons/Btn-GrayScale_700x130.png")
     buffButtonNormalImage:setFilter("nearest", "nearest")
-    buffButtonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_500x100.png")
+    buffButtonHoverImage = love.graphics.newImage("sprites/buttons/Btn-GrayScale-Hover_700x130.png")
     buffButtonHoverImage:setFilter("nearest", "nearest")
 
     -- Initialize selection state
@@ -48,9 +48,9 @@ function BuffSelectionScreen.update(dt)
     hoveredButton = nil
 
     -- Calculate button positions (vertical layout)
-    local buttonWidth = 500
-    local buttonHeight = 100
-    local buttonSpacing = 15
+    local buttonWidth = 700
+    local buttonHeight = 130
+    local buttonSpacing = 20
     local totalHeight = (#buffChoices * buttonHeight) + ((#buffChoices - 1) * buttonSpacing)
     local startY = (love.graphics.getHeight() - totalHeight) / 2
     local buttonX = (love.graphics.getWidth() - buttonWidth) / 2
@@ -74,25 +74,33 @@ function BuffSelectionScreen.draw()
 
     -- Draw title
     love.graphics.setColor(1, 1, 1)
+    love.graphics.setFont(GameFonts.title)
     love.graphics.printf("SELECT A BUFF", 0, 60, love.graphics.getWidth(), "center")
 
     -- Draw selections remaining
     love.graphics.setColor(0.7, 0.7, 0.9)
+    love.graphics.setFont(GameFonts.large)
     love.graphics.printf("Selections Remaining: " .. selectionsRemaining .. " / " .. maxSelections, 0, 100,
         love.graphics.getWidth(), "center")
 
     -- Draw selected buffs count
     if #selectedBuffs > 0 then
         love.graphics.setColor(0.3, 0.8, 0.3)
+        love.graphics.setFont(GameFonts.large)
         love.graphics.printf("Active Buffs: " .. #selectedBuffs, 0, 130, love.graphics.getWidth(), "center")
     end
 
     -- Draw buff choice buttons (vertical layout)
-    local buttonWidth = 500
-    local buttonHeight = 100
-    local buttonSpacing = 15
+    local buttonWidth = 700
+    local buttonHeight = 130
+    local buttonSpacing = 20
     local totalHeight = (#buffChoices * buttonHeight) + ((#buffChoices - 1) * buttonSpacing)
-    local startY = (love.graphics.getHeight() - totalHeight) / 2
+
+    -- Center buttons between the "Active Buffs" text and navigation text
+    local topBoundary = 160 -- Below "Active Buffs" text
+    local bottomBoundary = love.graphics.getHeight() - 80 -- Above navigation text
+    local availableHeight = bottomBoundary - topBoundary
+    local startY = topBoundary + (availableHeight - totalHeight) / 2
     local buttonX = (love.graphics.getWidth() - buttonWidth) / 2
 
     for i, buff in ipairs(buffChoices) do
@@ -111,27 +119,31 @@ function BuffSelectionScreen.draw()
         end
         love.graphics.draw(buttonImage, buttonX, buttonY)
 
-        -- Draw rarity badge
+        -- Draw rarity badge (top left)
+        love.graphics.setFont(GameFonts.normal)
         love.graphics.setColor(rarityColor)
-        love.graphics.print(buff.rarity:upper(), buttonX + 10, buttonY + 10)
+        love.graphics.print(buff.rarity:upper(), buttonX + 15, buttonY + 12)
 
-        -- Draw buff name
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.printf(buff.name, buttonX + 10, buttonY + 30, buttonWidth - 120, "left")
-
-        -- Draw buff value (on the right side)
+        -- Draw buff value (top right)
         local valueText = ""
         if buff.type == "multiplier" then
             valueText = "+" .. buff.value .. "%"
         else
             valueText = "+" .. buff.value
         end
+        love.graphics.setFont(GameFonts.large)
         love.graphics.setColor(0.3, 1, 0.3)
-        love.graphics.printf(valueText, buttonX + 10, buttonY + 10, buttonWidth - 20, "right")
+        love.graphics.printf(valueText, buttonX + 15, buttonY + 12, buttonWidth - 30, "right")
 
-        -- Draw buff description
+        -- Draw buff name (center-left)
+        love.graphics.setFont(GameFonts.large)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.print(buff.name, buttonX + 15, buttonY + 45)
+
+        -- Draw buff description (bottom)
+        love.graphics.setFont(GameFonts.normal)
         love.graphics.setColor(0.8, 0.8, 0.8)
-        love.graphics.printf(buff.description, buttonX + 10, buttonY + 55, buttonWidth - 20, "left")
+        love.graphics.printf(buff.description, buttonX + 15, buttonY + 80, buttonWidth - 30, "left")
     end
 
     -- Draw instructions
