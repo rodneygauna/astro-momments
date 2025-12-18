@@ -15,6 +15,9 @@ local selectedIndex
 local scrollOffset
 local maxVisibleUpgrades
 local categoryColors
+local cardNormalImage
+local cardHoverImage
+local detailPanelImage
 
 -- Initialize upgrade screen
 function UpgradeScreen.load(playerData, states, stateChanger)
@@ -24,6 +27,16 @@ function UpgradeScreen.load(playerData, states, stateChanger)
     selectedIndex = 1
     scrollOffset = 0
     maxVisibleUpgrades = 6
+
+    -- Load card sprite images
+    cardNormalImage = love.graphics.newImage("sprites/buttons/Btn_380x80.png")
+    cardNormalImage:setFilter("nearest", "nearest")
+    cardHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_380x80.png")
+    cardHoverImage:setFilter("nearest", "nearest")
+
+    -- Load detail panel image
+    detailPanelImage = love.graphics.newImage("sprites/prompts/UpgradePanel_486x530.png")
+    detailPanelImage:setFilter("nearest", "nearest")
 
     -- Build ordered upgrade list (12 total upgrades)
     upgradeList = {"engine_boost", "thruster_efficiency", "magnetic_field", "collection_speed", "decay_resistance",
@@ -120,21 +133,17 @@ function UpgradeScreen.draw()
     local listPanelWidth = 400
     local listPanelHeight = screenHeight - 200
 
-    local detailPanelX = listPanelX + listPanelWidth + 20
-    local detailPanelY = 130
-    local detailPanelWidth = screenWidth - detailPanelX - 50
-    local detailPanelHeight = screenHeight - 200
+    local scrollbarWidth = 8
+    local scrollbarSpacing = 10
+    local itemHeight = 90
+    local itemPadding = 10
 
-    -- Draw upgrade list panel
-    love.graphics.setColor(0.1, 0.1, 0.15, 0.9)
-    love.graphics.rectangle("fill", listPanelX, listPanelY, listPanelWidth, listPanelHeight, 8, 8)
-    love.graphics.setColor(0.3, 0.3, 0.4)
-    love.graphics.setLineWidth(2)
-    love.graphics.rectangle("line", listPanelX, listPanelY, listPanelWidth, listPanelHeight, 8, 8)
+    local detailPanelX = listPanelX + listPanelWidth + scrollbarSpacing + scrollbarWidth + 20
+    local detailPanelY = listPanelY + itemPadding
+    local detailPanelWidth = screenWidth - detailPanelX - 50
+    local detailPanelHeight = (maxVisibleUpgrades * itemHeight) - itemPadding
 
     -- Draw upgrade list items
-    local itemHeight = 70
-    local itemPadding = 10
     local startIndex = scrollOffset + 1
     local endIndex = math.min(scrollOffset + maxVisibleUpgrades, #upgradeList)
 
@@ -150,65 +159,60 @@ function UpgradeScreen.draw()
         local itemX = listPanelX + itemPadding
         local itemWidth = listPanelWidth - (itemPadding * 2)
 
-        -- Draw selection highlight
-        if i == selectedIndex then
-            love.graphics.setColor(0.3, 0.4, 0.6, 0.5)
-            love.graphics.rectangle("fill", itemX, itemY, itemWidth, itemHeight - itemPadding, 5, 5)
-        end
-
-        -- Draw category color bar
-        local categoryColor = categoryColors[upgrade.category] or {0.5, 0.5, 0.5}
-        love.graphics.setColor(categoryColor[1], categoryColor[2], categoryColor[3])
-        love.graphics.rectangle("fill", itemX, itemY, 5, itemHeight - itemPadding, 2, 2)
+        -- Draw card background sprite
+        local cardImage = (i == selectedIndex) and cardHoverImage or cardNormalImage
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.draw(cardImage, itemX, itemY)
 
         -- Draw upgrade name
         love.graphics.setColor(1, 1, 1)
-        love.graphics.setFont(love.graphics.newFont(16))
-        love.graphics.print(upgrade.name, itemX + 15, itemY + 5)
+        love.graphics.setFont(GameFonts.medium)
+        love.graphics.print(upgrade.name, itemX + 15, itemY + 12)
 
         -- Draw level indicator
-        love.graphics.setFont(love.graphics.newFont(14))
+        love.graphics.setFont(GameFonts.normal)
         love.graphics.setColor(0.7, 0.7, 0.7)
-        love.graphics.print("Level: " .. currentLevel .. "/" .. upgrade.maxLevel, itemX + 15, itemY + 28)
+        love.graphics.print("Level: " .. currentLevel .. "/" .. upgrade.maxLevel, itemX + 15, itemY + 36)
 
         -- Draw cost or max level indicator
         if isMaxLevel then
             love.graphics.setColor(0.3, 1, 0.3)
-            love.graphics.print("MAX", itemX + 15, itemY + 48)
+            love.graphics.print("MAX", itemX + 15, itemY + 56)
         else
             if canAfford then
                 love.graphics.setColor(1, 0.9, 0.3)
             else
                 love.graphics.setColor(0.8, 0.3, 0.3)
             end
-            love.graphics.print("Cost: " .. cost .. " gold", itemX + 15, itemY + 48)
+            love.graphics.print("Cost: " .. cost .. " gold", itemX + 15, itemY + 56)
         end
     end
 
     -- Draw scrollbar if needed
     if #upgradeList > maxVisibleUpgrades then
-        local scrollbarX = listPanelX + listPanelWidth - 15
-        local scrollbarY = listPanelY + 10
-        local scrollbarHeight = listPanelHeight - 20
-        local scrollbarWidth = 5
+        local listHeight = (maxVisibleUpgrades * itemHeight)
 
+        local scrollbarX = listPanelX + listPanelWidth + 10
+        local scrollbarY = listPanelY + itemPadding
+        local scrollbarWidth = 8
+        local scrollbarHeight = listHeight - itemPadding
+
+        -- Scrollbar background
         love.graphics.setColor(0.2, 0.2, 0.25)
-        love.graphics.rectangle("fill", scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight, 2, 2)
+        love.graphics.rectangle("fill", scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight, 4, 4)
 
+        -- Scrollbar thumb
         local thumbHeight = (maxVisibleUpgrades / #upgradeList) * scrollbarHeight
         local thumbY = scrollbarY + (scrollOffset / (#upgradeList - maxVisibleUpgrades)) *
                            (scrollbarHeight - thumbHeight)
 
         love.graphics.setColor(0.5, 0.5, 0.6)
-        love.graphics.rectangle("fill", scrollbarX, thumbY, scrollbarWidth, thumbHeight, 2, 2)
+        love.graphics.rectangle("fill", scrollbarX, thumbY, scrollbarWidth, thumbHeight, 4, 4)
     end
 
     -- Draw detail panel
-    love.graphics.setColor(0.1, 0.1, 0.15, 0.9)
-    love.graphics.rectangle("fill", detailPanelX, detailPanelY, detailPanelWidth, detailPanelHeight, 8, 8)
-    love.graphics.setColor(0.3, 0.3, 0.4)
-    love.graphics.setLineWidth(2)
-    love.graphics.rectangle("line", detailPanelX, detailPanelY, detailPanelWidth, detailPanelHeight, 8, 8)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(detailPanelImage, detailPanelX, detailPanelY)
 
     -- Draw selected upgrade details
     if selectedUpgradeId then
@@ -223,29 +227,29 @@ function UpgradeScreen.draw()
 
         -- Draw upgrade name
         love.graphics.setColor(1, 1, 1)
-        love.graphics.setFont(love.graphics.newFont(24))
+        love.graphics.setFont(GameFonts.large)
         love.graphics.print(upgrade.name, detailX, detailY)
 
         -- Draw category
         love.graphics.setColor(categoryColor[1], categoryColor[2], categoryColor[3])
-        love.graphics.setFont(love.graphics.newFont(14))
+        love.graphics.setFont(GameFonts.normal)
         love.graphics.print(upgrade.category:upper(), detailX, detailY + 30)
 
         -- Draw description
         love.graphics.setColor(0.9, 0.9, 0.9)
-        love.graphics.setFont(love.graphics.newFont(16))
+        love.graphics.setFont(GameFonts.medium)
         love.graphics.printf(upgrade.description, detailX, detailY + 60, detailPanelWidth - 40, "left")
 
         -- Draw current level and max level
         love.graphics.setColor(1, 1, 1)
-        love.graphics.setFont(love.graphics.newFont(18))
+        love.graphics.setFont(GameFonts.medium)
         love.graphics.print("Current Level: " .. currentLevel .. " / " .. upgrade.maxLevel, detailX, detailY + 110)
 
         -- Draw current effect
         if currentLevel > 0 then
             local effectValue = Upgrades.getEffectValue(selectedUpgradeId, currentLevel)
             love.graphics.setColor(0.3, 1, 0.3)
-            love.graphics.setFont(love.graphics.newFont(16))
+            love.graphics.setFont(GameFonts.medium)
 
             local effectText
             if upgrade.effect.type == "percentage" then
@@ -263,7 +267,7 @@ function UpgradeScreen.draw()
             local nextLevel = currentLevel + 1
             local nextEffectValue = Upgrades.getEffectValue(selectedUpgradeId, nextLevel)
             love.graphics.setColor(0.7, 0.7, 1)
-            love.graphics.setFont(love.graphics.newFont(16))
+            love.graphics.setFont(GameFonts.medium)
 
             local nextEffectText
             if upgrade.effect.type == "percentage" then
@@ -277,21 +281,20 @@ function UpgradeScreen.draw()
 
             -- Draw cost
             love.graphics.setColor(1, 0.9, 0.3)
-            love.graphics.setFont(love.graphics.newFont(20))
+            love.graphics.setFont(GameFonts.large)
             love.graphics.print("Cost: " .. cost .. " gold", detailX, detailY + 210)
         else
             love.graphics.setColor(0.3, 1, 0.3)
-            love.graphics.setFont(love.graphics.newFont(20))
+            love.graphics.setFont(GameFonts.large)
             love.graphics.print("MAX LEVEL REACHED", detailX, detailY + 170)
         end
     end
 
     -- Draw controls help
     love.graphics.setColor(0.7, 0.7, 0.7)
-    love.graphics.setFont(love.graphics.newFont(14))
-    local controlsY = screenHeight - 50
-    love.graphics.printf("[W/S or UP/DOWN] Navigate  [ENTER/SPACE or CLICK] Purchase  [ESC] Exit", 0, controlsY,
-        screenWidth, "center")
+    love.graphics.setFont(GameFonts.normal)
+    love.graphics.printf("[W/S or UP/DOWN] Navigate  [ENTER/SPACE or CLICK] Purchase  [ESC] Exit", 0,
+        love.graphics.getHeight() - 40, love.graphics.getWidth(), "center")
 
     -- Reset line width
     love.graphics.setLineWidth(1)
