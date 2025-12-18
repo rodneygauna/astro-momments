@@ -43,10 +43,10 @@ local function drawButton(button, buttonX, buttonY, isHovered)
     love.graphics.draw(buttonImage, buttonX, buttonY)
 
     -- Draw button text on top
-    love.graphics.setFont(GameFonts.medium)
+    love.graphics.setFont(GameFonts.large)
     local textColor = button.enabled and {1, 1, 1} or {0.5, 0.5, 0.5}
     love.graphics.setColor(textColor)
-    love.graphics.printf(button.text, buttonX, buttonY + (menu.buttonHeight - 20) / 2, menu.buttonWidth, "center")
+    love.graphics.printf(button.text, buttonX, buttonY + 30, menu.buttonWidth, "center")
 end
 
 -- Helper function: Rebuild button list based on current save state
@@ -108,9 +108,9 @@ function MenuScreen.load(gameStates, changeState)
     backgroundImage:setFilter("nearest", "nearest") -- Prevents blurriness when scaling
 
     -- Load generic button images
-    buttonNormalImage = love.graphics.newImage("sprites/buttons/Btn_200x50.png")
+    buttonNormalImage = love.graphics.newImage("sprites/buttons/Btn_380x80.png")
     buttonNormalImage:setFilter("nearest", "nearest")
-    buttonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_200x50.png")
+    buttonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_380x80.png")
     buttonHoverImage:setFilter("nearest", "nearest")
 
     -- Load dialog button images (for Yes/No buttons)
@@ -124,9 +124,9 @@ function MenuScreen.load(gameStates, changeState)
     confirmationPromptImage:setFilter("nearest", "nearest")
 
     menu = {}
-    menu.buttonHeight = 50
-    menu.buttonWidth = 200
-    menu.buttonSpacing = 10
+    menu.buttonHeight = 80
+    menu.buttonWidth = 380
+    menu.buttonSpacing = 15
     menu.gameStates = gameStates
     menu.changeState = changeState
     menu.selectedIndex = 1
@@ -202,7 +202,7 @@ function MenuScreen.draw()
     -- Draw title
     love.graphics.setColor(1, 1, 1)
     love.graphics.setFont(GameFonts.huge)
-    love.graphics.printf("Astro Moments", 0, 100, love.graphics.getWidth(), "center")
+    love.graphics.printf("Astro Moments", 0, 50, love.graphics.getWidth(), "center")
 
     -- Reset to default font for buttons
     love.graphics.setFont(GameFonts.large)
