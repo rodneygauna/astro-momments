@@ -15,6 +15,10 @@ local cameraFile = require("libs/hump/camera")
 -- Global game fonts (will be initialized in love.load() and accessible to all screens)
 GameFonts = {}
 
+-- Global music state
+local musicTracks = {}
+local currentTrackIndex = 1
+
 -- Global game state
 local player
 local cam
@@ -87,6 +91,16 @@ function love.load()
     -- Set default font
     love.graphics.setFont(GameFonts.medium)
 
+    -- Load background music tracks (streamed for memory efficiency)
+    musicTracks = {love.audio.newSource("music/bg/Starlight_Code.ogg", "stream"),
+                   love.audio.newSource("music/bg/Cosmic_Arcade.ogg", "stream"),
+                   love.audio.newSource("music/bg/Pixel_Stars.ogg", "stream"),
+                   love.audio.newSource("music/bg/Stellar_Drift.ogg", "stream")}
+
+    -- Start playing the first track
+    currentTrackIndex = 1
+    love.audio.play(musicTracks[currentTrackIndex])
+
     -- Initialize player
     player = Player.new()
 
@@ -106,6 +120,16 @@ end
 function love.update(dt)
     -- Update player playtime
     Player.updatePlaytime(player, dt)
+
+    -- Check if current music track has finished and start next track
+    if not musicTracks[currentTrackIndex]:isPlaying() then
+        -- Move to next track (loop back to 1 after track 4)
+        currentTrackIndex = currentTrackIndex + 1
+        if currentTrackIndex > #musicTracks then
+            currentTrackIndex = 1
+        end
+        love.audio.play(musicTracks[currentTrackIndex])
+    end
 
     -- Delegate to current screen
     if currentScreen and currentScreen.update then
