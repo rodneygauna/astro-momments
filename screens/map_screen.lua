@@ -318,14 +318,55 @@ function MapScreen.draw()
         local description = sector.description or "A sector rich with asteroids awaiting discovery."
         love.graphics.printf(description, detailX, detailY + 70, detailPanelWidth - 40, "left")
 
-        -- Draw asteroid info placeholder
+        -- Draw asteroid info
         love.graphics.setColor(0.7, 0.7, 1)
         love.graphics.setFont(GameFonts.normal)
         love.graphics.print("Asteroids Found:", detailX, detailY + 180)
-        love.graphics.setColor(0.8, 0.8, 0.8)
-        love.graphics.print("• Common minerals", detailX + 10, detailY + 210)
-        love.graphics.print("• Rare crystals", detailX + 10, detailY + 235)
-        love.graphics.print("• Precious gems", detailX + 10, detailY + 260)
+
+        -- Display actual asteroid types from sector
+        local Asteroid = require("src/asteroid")
+        local yOffset = 210
+        for i, asteroidTypeId in ipairs(sector.asteroidTypes) do
+            -- Find the asteroid type definition
+            local asteroidData = nil
+            for _, aType in ipairs(Asteroid.types) do
+                if aType.id == asteroidTypeId then
+                    asteroidData = aType
+                    break
+                end
+            end
+
+            if asteroidData then
+                -- Generate vertices for asteroid icon (small polygon)
+                local numVertices = 7
+                local vertices = {}
+                local iconRadius = 6
+                local iconX = detailX + 20
+                local iconY = detailY + yOffset + 8
+
+                for v = 1, numVertices do
+                    local angleStep = (2 * math.pi) / numVertices
+                    local angle = (v - 1) * angleStep
+                    local radiusVariation = iconRadius * (0.7 + 0.3) -- Slight variation
+                    table.insert(vertices, iconX + math.cos(angle) * radiusVariation)
+                    table.insert(vertices, iconY + math.sin(angle) * radiusVariation)
+                end
+
+                -- Draw asteroid icon
+                love.graphics.setColor(asteroidData.color)
+                love.graphics.polygon("fill", vertices)
+                love.graphics.setColor(1, 1, 1, 0.3)
+                love.graphics.polygon("line", vertices)
+
+                -- Draw asteroid name and value
+                love.graphics.setColor(0.8, 0.8, 0.8)
+                local displayName = asteroidTypeId:gsub("_", " "):gsub("(%a)([%w_']*)", function(first, rest)
+                    return first:upper() .. rest:lower()
+                end)
+                love.graphics.print(displayName .. " (" .. asteroidData.value .. "g)", iconX + 15, detailY + yOffset)
+                yOffset = yOffset + 25
+            end
+        end
 
         -- Draw cost/fuel info
         if button.isUnlocked then
