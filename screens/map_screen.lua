@@ -24,6 +24,7 @@ local refuelButtonNormalImage
 local refuelButtonHoverImage
 local upgradeButtonNormalImage
 local upgradeButtonHoverImage
+local lastSelectedIndex -- Store the last selected sector index
 
 -- Initialize map screen
 function MapScreen.load(playerData, states, stateChanger)
@@ -55,7 +56,7 @@ function MapScreen.load(playerData, states, stateChanger)
     hoveredButton = nil
     scrollOffset = 0
     maxVisibleSectors = 6 -- Show 6 sectors at a time
-    selectedIndex = 1 -- Start with first sector selected
+    selectedIndex = lastSelectedIndex or 1 -- Restore last selected index or start with first sector
 
     -- Create upgrade button
     upgradeButton = {
@@ -105,6 +106,11 @@ function MapScreen.load(playerData, states, stateChanger)
 
             currentY = currentY + buttonHeight + buttonSpacing
         end
+    end
+
+    -- Adjust scroll offset to keep selected sector visible
+    if selectedIndex > maxVisibleSectors then
+        scrollOffset = math.min(selectedIndex - maxVisibleSectors, #sectorButtons - maxVisibleSectors)
     end
 end
 
@@ -356,6 +362,8 @@ function MapScreen.keypressed(key)
 
             -- Check if player has enough fuel
             if player.currency.fuel >= actualFuelCost then
+                -- Store the selected index before leaving
+                lastSelectedIndex = selectedIndex
                 -- Deduct fuel and start mining
                 Player.purchase(player, 0, actualFuelCost)
                 changeState(gameStates.MINING, btn.sectorId, actualFuelCost)
@@ -432,6 +440,13 @@ function MapScreen.mousepressed(x, y, button)
 
                 -- Check if player has enough fuel
                 if player.currency.fuel >= actualFuelCost then
+                    -- Find and store the selected index before leaving
+                    for i, button in ipairs(sectorButtons) do
+                        if button == btn then
+                            lastSelectedIndex = i
+                            break
+                        end
+                    end
                     -- Deduct fuel and start mining
                     Player.purchase(player, 0, actualFuelCost)
                     changeState(gameStates.MINING, btn.sectorId, actualFuelCost)
