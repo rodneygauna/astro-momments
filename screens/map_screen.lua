@@ -49,9 +49,9 @@ function MapScreen.load(playerData, states, stateChanger)
     refuelButtonHoverImage:setFilter("nearest", "nearest")
 
     -- Load upgrade button images
-    upgradeButtonNormalImage = love.graphics.newImage("sprites/buttons/Btn_150x50.png")
+    upgradeButtonNormalImage = love.graphics.newImage("sprites/buttons/Btn_200x50.png")
     upgradeButtonNormalImage:setFilter("nearest", "nearest")
-    upgradeButtonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_150x50.png")
+    upgradeButtonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_200x50.png")
     upgradeButtonHoverImage:setFilter("nearest", "nearest")
 
     -- Load detail panel image
@@ -67,7 +67,7 @@ function MapScreen.load(playerData, states, stateChanger)
     upgradeButton = {
         x = 20,
         y = 20,
-        width = 150,
+        width = 200,
         height = 50,
         text = "UPGRADES"
     }
