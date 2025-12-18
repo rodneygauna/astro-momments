@@ -140,7 +140,7 @@ function CreditsScreen.draw()
 
     -- Draw credits content
     love.graphics.setColor(1, 1, 1)
-    love.graphics.setFont(GameFonts.large)
+    love.graphics.setFont(GameFonts.title)
     love.graphics.printf("Astro Moments", 0, 100, love.graphics.getWidth(), "center")
 
     love.graphics.setFont(GameFonts.medium)
@@ -150,21 +150,25 @@ function CreditsScreen.draw()
     local creditsY = 220
     local lineSpacing = 30
 
-    -- Add your credits here
+    -- Credits
     love.graphics.printf("Game Design & Development", 0, creditsY, love.graphics.getWidth(), "center")
     creditsY = creditsY + lineSpacing
-    love.graphics.printf("Your Name", 0, creditsY, love.graphics.getWidth(), "center")
+    love.graphics.printf("Rodney 's0n0f4L1ch' Gauna", 0, creditsY, love.graphics.getWidth(), "center")
 
     creditsY = creditsY + lineSpacing * 2
     love.graphics.printf("Libraries & Tools", 0, creditsY, love.graphics.getWidth(), "center")
     creditsY = creditsY + lineSpacing
-    love.graphics.printf("LÖVE Framework", 0, creditsY, love.graphics.getWidth(), "center")
+    love.graphics.printf("LÖVE2D Framework", 0, creditsY, love.graphics.getWidth(), "center")
     creditsY = creditsY + lineSpacing
     love.graphics.printf("HUMP Library", 0, creditsY, love.graphics.getWidth(), "center")
+    creditsY = creditsY + lineSpacing
+    love.graphics.printf("dkjson Library", 0, creditsY, love.graphics.getWidth(), "center")
 
     -- Controls hint at bottom
     love.graphics.setColor(0.7, 0.7, 0.7)
     love.graphics.setFont(GameFonts.normal)
+    love.graphics.printf("Built for the Codedex Winter 2025 Game Jam", 0, love.graphics.getHeight() - 80,
+        love.graphics.getWidth(), "center")
     love.graphics.printf("[ESC] Return to Menu", 0, love.graphics.getHeight() - 50, love.graphics.getWidth(), "center")
 end
 
