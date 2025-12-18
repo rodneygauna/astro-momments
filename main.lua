@@ -3,12 +3,14 @@ local love = require("love")
 
 -- Module imports
 local Player = require("src/player")
+local Settings = require("src/settings")
 local MenuScreen = require("screens/menu_screen")
 local MiningScreen = require("screens/mining_screen")
 local CashoutScreen = require("screens/cashout_screen")
 local MapScreen = require("screens/map_screen")
 local BuffSelectionScreen = require("screens/buff_selection_screen")
 local UpgradeScreen = require("screens/upgrade_screen")
+local SettingsScreen = require("screens/settings_screen")
 local CreditsScreen = require("screens/credits_screen")
 local cameraFile = require("libs/hump/camera")
 
@@ -61,8 +63,8 @@ local function changeGameState(newState, ...)
         MapScreen.load(player, gameStates, changeGameState)
         currentScreen = MapScreen
     elseif newState == gameStates.SETTINGS then
-        -- TODO: Load settings screen
-        currentScreen = nil
+        SettingsScreen.load(gameStates, changeGameState)
+        currentScreen = SettingsScreen
     elseif newState == gameStates.CREDITS then
         CreditsScreen.load(gameStates, changeGameState)
         currentScreen = CreditsScreen
@@ -79,6 +81,10 @@ end
 function love.load()
     -- Set random seed
     math.randomseed(os.time())
+
+    -- Load and apply settings
+    Settings.load()
+    Settings.apply()
 
     -- Load custom fonts in various sizes (accessible globally as GameFonts)
     GameFonts.small = love.graphics.newFont("fonts/prstartk.ttf", 12)
@@ -194,5 +200,13 @@ function love.mousepressed(x, y, button)
     -- Delegate to current screen
     if currentScreen and currentScreen.mousepressed then
         currentScreen.mousepressed(x, y, button)
+    end
+end
+
+-- Love2D mousemoved function
+function love.mousemoved(x, y, dx, dy)
+    -- Delegate to current screen (for slider dragging in settings)
+    if currentScreen and currentScreen.mousemoved then
+        currentScreen.mousemoved(x, y, dx, dy)
     end
 end
