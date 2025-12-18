@@ -25,6 +25,7 @@ local refuelButtonHoverImage
 local upgradeButtonNormalImage
 local upgradeButtonHoverImage
 local lastSelectedIndex -- Store the last selected sector index
+local detailPanelImage
 
 -- Initialize map screen
 function MapScreen.load(playerData, states, stateChanger)
@@ -36,9 +37,9 @@ function MapScreen.load(playerData, states, stateChanger)
     Upgrades.applyUpgradeEffects(player)
 
     -- Load sector button images
-    sectorButtonNormalImage = love.graphics.newImage("sprites/buttons/Btn_500x60.png")
+    sectorButtonNormalImage = love.graphics.newImage("sprites/buttons/Btn_380x80.png")
     sectorButtonNormalImage:setFilter("nearest", "nearest")
-    sectorButtonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_500x60.png")
+    sectorButtonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_380x80.png")
     sectorButtonHoverImage:setFilter("nearest", "nearest")
 
     -- Load refuel button images
@@ -52,6 +53,10 @@ function MapScreen.load(playerData, states, stateChanger)
     upgradeButtonNormalImage:setFilter("nearest", "nearest")
     upgradeButtonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_150x50.png")
     upgradeButtonHoverImage:setFilter("nearest", "nearest")
+
+    -- Load detail panel image
+    detailPanelImage = love.graphics.newImage("sprites/prompts/UpgradePanel_486x530.png")
+    detailPanelImage:setFilter("nearest", "nearest")
 
     hoveredButton = nil
     scrollOffset = 0
@@ -78,12 +83,8 @@ function MapScreen.load(playerData, states, stateChanger)
 
     -- Create sector buttons
     sectorButtons = {}
-    local buttonWidth = 500
-    local buttonHeight = 60
-    local buttonSpacing = 10
-    local startX = (love.graphics.getWidth() - buttonWidth) / 2
-    local startY = 120
-    local currentY = startY
+    local buttonWidth = 380
+    local buttonHeight = 80
 
     -- Create buttons for each sector
     for i = 1, 10 do
@@ -94,17 +95,11 @@ function MapScreen.load(playerData, states, stateChanger)
             local isUnlocked = Player.isMapUnlocked(player, sectorId)
 
             table.insert(sectorButtons, {
-                x = startX,
-                y = currentY,
-                width = buttonWidth,
-                height = buttonHeight,
                 sectorId = sectorId,
                 sector = sector,
                 isUnlocked = isUnlocked,
                 canAfford = Player.canAfford(player, sector.unlock_cost, 0)
             })
-
-            currentY = currentY + buttonHeight + buttonSpacing
         end
     end
 
@@ -134,15 +129,24 @@ function MapScreen.update(dt)
         return
     end
 
-    -- Only check visible sector buttons for hover
+    -- Check sector card hover
+    local listPanelX = 50
+    local listPanelY = 130
+    local itemHeight = 90
+    local itemPadding = 10
+    local listPanelWidth = 400
+
     local startIndex = scrollOffset + 1
     local endIndex = math.min(scrollOffset + maxVisibleSectors, #sectorButtons)
 
     for i = startIndex, endIndex do
-        local button = sectorButtons[i]
-        if mouseX >= button.x and mouseX <= button.x + button.width and mouseY >= button.y and mouseY <= button.y +
-            button.height then
-            hoveredButton = button
+        local itemY = listPanelY + ((i - scrollOffset - 1) * itemHeight) + itemPadding
+        local itemX = listPanelX + itemPadding
+        local itemWidth = listPanelWidth - (itemPadding * 2)
+        local itemButtonHeight = 80
+
+        if mouseX >= itemX and mouseX <= itemX + itemWidth and mouseY >= itemY and mouseY <= itemY + itemButtonHeight then
+            hoveredButton = i
             break
         end
     end
@@ -150,49 +154,50 @@ end
 
 -- Draw map screen
 function MapScreen.draw()
+    local screenWidth = love.graphics.getWidth()
+    local screenHeight = love.graphics.getHeight()
+
     -- Draw background
     love.graphics.setColor(0.05, 0.05, 0.1)
-    love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+    love.graphics.rectangle("fill", 0, 0, screenWidth, screenHeight)
+
+    -- Draw title
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.setFont(GameFonts.title)
+    love.graphics.printf("SELECT SECTOR", 0, 30, screenWidth, "center")
 
     -- Draw upgrade button
     local isUpgradeHovered = (hoveredButton == upgradeButton)
     local upgradeButtonImage = isUpgradeHovered and upgradeButtonHoverImage or upgradeButtonNormalImage
     love.graphics.setColor(1, 1, 1)
     love.graphics.draw(upgradeButtonImage, upgradeButton.x, upgradeButton.y)
+    love.graphics.setFont(GameFonts.normal)
     love.graphics.printf(upgradeButton.text, upgradeButton.x, upgradeButton.y + 15, upgradeButton.width, "center")
 
     -- Draw refuel button
     local isRefuelHovered = (hoveredButton == refuelButton)
     local needsEmergency = Player.needsEmergencyBeacon(player)
     local cost, fuelGained = Player.calculateRefuelCost(player)
-    local canRefuel = cost > 0 and fuelGained > 0 and player.currency.gold >= cost
 
     -- Determine button state and text
     local buttonText, textColor
     if needsEmergency then
-        -- Emergency beacon mode
         buttonText = "EMERGENCY BEACON"
         textColor = {1, 1, 1}
     elseif fuelGained == 0 then
-        -- Already at max fuel
         buttonText = "REFUEL (FULL)"
         textColor = {0.6, 0.6, 0.6}
     elseif player.currency.gold == 0 then
-        -- No gold - show disabled
         buttonText = "Refuel (+" .. fuelGained .. "): " .. cost .. "g"
         textColor = {0.6, 0.6, 0.6}
     else
-        -- Normal refuel mode
         buttonText = "Refuel (+" .. fuelGained .. "): " .. cost .. "g"
         textColor = {1, 1, 1}
     end
 
-    -- Draw button sprite
     local refuelButtonImage = isRefuelHovered and refuelButtonHoverImage or refuelButtonNormalImage
     love.graphics.setColor(1, 1, 1)
     love.graphics.draw(refuelButtonImage, refuelButton.x, refuelButton.y)
-
-    -- Draw button text (vertically centered for multi-line text)
     love.graphics.setColor(textColor)
     love.graphics.setFont(GameFonts.normal)
     local font = love.graphics.getFont()
@@ -200,44 +205,45 @@ function MapScreen.draw()
     local textHeight = #wrappedText * font:getHeight()
     local textY = refuelButton.y + (refuelButton.height - textHeight) / 2
     love.graphics.printf(buttonText, refuelButton.x, textY, refuelButton.width, "center")
-    love.graphics.setFont(GameFonts.medium)
 
-    -- Draw gold display next to upgrade button
+    -- Draw currency displays
+    love.graphics.setFont(GameFonts.large)
     love.graphics.setColor(1, 0.9, 0.3)
-    love.graphics.printf("Gold: " .. player.currency.gold, upgradeButton.x + upgradeButton.width + 20,
-        upgradeButton.y + 15, 200, "left")
-
-    -- Draw title
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.printf("SELECT SECTOR", 0, 30, love.graphics.getWidth(), "center")
-
-    -- Draw fuel display
+    love.graphics.printf("Gold: " .. player.currency.gold, 0, 80, screenWidth, "center")
     love.graphics.setColor(0.3, 0.8, 1)
     local maxFuel = Player.getMaxFuel(player)
-    love.graphics
-        .printf("Fuel: " .. player.currency.fuel .. " / " .. maxFuel, 0, 70, love.graphics.getWidth(), "center")
+    love.graphics.printf("Fuel: " .. player.currency.fuel .. " / " .. maxFuel, 0, 110, screenWidth, "center")
 
-    -- Calculate visible range
+    -- Layout dimensions (matching upgrade screen)
+    local listPanelX = 50
+    local listPanelY = 132
+    local listPanelWidth = 400
+    local scrollbarWidth = 8
+    local scrollbarSpacing = 10
+    local itemHeight = 90
+    local itemPadding = 10
+
+    local detailPanelX = listPanelX + listPanelWidth + scrollbarSpacing + scrollbarWidth + 20
+    local detailPanelY = listPanelY + itemPadding
+    local detailPanelWidth = screenWidth - detailPanelX - 50
+    local detailPanelHeight = (maxVisibleSectors * itemHeight) - itemPadding
+
+    -- Draw sector list items
     local startIndex = scrollOffset + 1
     local endIndex = math.min(scrollOffset + maxVisibleSectors, #sectorButtons)
 
-    -- Draw sector buttons (only visible ones)
     for i = startIndex, endIndex do
         local button = sectorButtons[i]
-        local isHovered = (hoveredButton == button) or (selectedIndex == i)
+        local isHovered = (hoveredButton == i) or (selectedIndex == i)
 
-        -- Recalculate button Y position for scrolling
-        local buttonWidth = 500
-        local buttonHeight = 60
-        local buttonSpacing = 10
-        local startX = (love.graphics.getWidth() - buttonWidth) / 2
-        local startY = 120
-        button.y = startY + ((i - scrollOffset - 1) * (buttonHeight + buttonSpacing))
+        local itemY = listPanelY + ((i - scrollOffset - 1) * itemHeight) + itemPadding
+        local itemX = listPanelX + itemPadding
+        local itemWidth = listPanelWidth - (itemPadding * 2)
 
-        -- Draw button sprite
-        local buttonImage = isHovered and sectorButtonHoverImage or sectorButtonNormalImage
+        -- Draw card background sprite
+        local cardImage = isHovered and sectorButtonHoverImage or sectorButtonNormalImage
         love.graphics.setColor(1, 1, 1)
-        love.graphics.draw(buttonImage, button.x, button.y)
+        love.graphics.draw(cardImage, itemX, itemY)
 
         -- Determine text color based on state
         local textColor
@@ -252,43 +258,18 @@ function MapScreen.draw()
         end
 
         -- Draw sector name
+        love.graphics.setFont(GameFonts.large)
         love.graphics.setColor(textColor)
-        love.graphics.printf(button.sector.name, button.x + 10, button.y + 10, button.width - 20, "left")
-
-        -- Draw sector info
-        if button.isUnlocked then
-            -- Calculate actual fuel cost with efficiency upgrade
-            local fuelEfficiency = (player.stats.fuelEfficiency or 0) / 100
-            local actualFuelCost = math.ceil(button.sector.fuel_cost * (1 - fuelEfficiency))
-
-            -- Show fuel cost
-            love.graphics.setColor(0.7, 0.7, 0.7)
-            local fuelText = "Fuel Cost: " .. actualFuelCost
-            if fuelEfficiency > 0 then
-                fuelText = fuelText .. " (" .. button.sector.fuel_cost .. " -" .. math.floor(fuelEfficiency * 100) ..
-                               "%)"
-            end
-            love.graphics.printf(fuelText, button.x + 10, button.y + 35, button.width - 20, "left")
-        else
-            -- Show unlock cost
-            love.graphics.setColor(textColor[1] * 0.8, textColor[2] * 0.8, textColor[3] * 0.8)
-            love.graphics.printf("Unlock: " .. button.sector.unlock_cost .. " Gold", button.x + 10, button.y + 35,
-                button.width - 20, "left")
-        end
+        love.graphics.print(button.sector.name, itemX + 15, itemY + 30)
     end
 
     -- Draw scrollbar if needed
     if #sectorButtons > maxVisibleSectors then
-        local buttonWidth = 500
-        local buttonHeight = 60
-        local buttonSpacing = 10
-        local startX = (love.graphics.getWidth() - buttonWidth) / 2
-        local listHeight = maxVisibleSectors * (buttonHeight + buttonSpacing)
+        local listHeight = (maxVisibleSectors * itemHeight)
 
-        local scrollbarX = startX + buttonWidth + 10
-        local scrollbarY = 120
-        local scrollbarWidth = 8
-        local scrollbarHeight = listHeight
+        local scrollbarX = listPanelX + listPanelWidth + 10
+        local scrollbarY = listPanelY + itemPadding
+        local scrollbarHeight = listHeight - itemPadding
 
         -- Scrollbar background
         love.graphics.setColor(0.2, 0.2, 0.25)
@@ -303,11 +284,100 @@ function MapScreen.draw()
         love.graphics.rectangle("fill", scrollbarX, thumbY, scrollbarWidth, thumbHeight, 4, 4)
     end
 
+    -- Draw detail panel
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(detailPanelImage, detailPanelX, detailPanelY)
+
+    -- Draw selected sector details
+    if selectedIndex and sectorButtons[selectedIndex] then
+        local button = sectorButtons[selectedIndex]
+        local sector = button.sector
+
+        local detailX = detailPanelX + 20
+        local detailY = detailPanelY + 20
+
+        -- Draw sector name
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.setFont(GameFonts.large)
+        love.graphics.print(sector.name, detailX, detailY)
+
+        -- Draw status (locked/unlocked)
+        if button.isUnlocked then
+            love.graphics.setColor(0.3, 1, 0.3)
+            love.graphics.setFont(GameFonts.normal)
+            love.graphics.print("UNLOCKED", detailX, detailY + 30)
+        else
+            love.graphics.setColor(1, 0.8, 0.3)
+            love.graphics.setFont(GameFonts.normal)
+            love.graphics.print("LOCKED", detailX, detailY + 30)
+        end
+
+        -- Draw description placeholder
+        love.graphics.setColor(0.9, 0.9, 0.9)
+        love.graphics.setFont(GameFonts.medium)
+        local description = sector.description or "A sector rich with asteroids awaiting discovery."
+        love.graphics.printf(description, detailX, detailY + 70, detailPanelWidth - 40, "left")
+
+        -- Draw asteroid info placeholder
+        love.graphics.setColor(0.7, 0.7, 1)
+        love.graphics.setFont(GameFonts.normal)
+        love.graphics.print("Asteroids Found:", detailX, detailY + 180)
+        love.graphics.setColor(0.8, 0.8, 0.8)
+        love.graphics.print("• Common minerals", detailX + 10, detailY + 210)
+        love.graphics.print("• Rare crystals", detailX + 10, detailY + 235)
+        love.graphics.print("• Precious gems", detailX + 10, detailY + 260)
+
+        -- Draw cost/fuel info
+        if button.isUnlocked then
+            -- Calculate actual fuel cost with efficiency
+            local fuelEfficiency = (player.stats.fuelEfficiency or 0) / 100
+            local actualFuelCost = math.ceil(sector.fuel_cost * (1 - fuelEfficiency))
+
+            love.graphics.setColor(0.3, 0.8, 1)
+            love.graphics.setFont(GameFonts.large)
+            love.graphics.print("Fuel Cost: " .. actualFuelCost, detailX, detailY + 320)
+
+            if fuelEfficiency > 0 then
+                love.graphics.setFont(GameFonts.normal)
+                love.graphics.setColor(0.6, 0.6, 0.6)
+                love.graphics.print("(Base: " .. sector.fuel_cost .. " -" .. math.floor(fuelEfficiency * 100) .. "%)",
+                    detailX, detailY + 350)
+            end
+
+            -- Show if can afford
+            if player.currency.fuel >= actualFuelCost then
+                love.graphics.setColor(0.3, 1, 0.3)
+                love.graphics.setFont(GameFonts.medium)
+                love.graphics.print("Ready to explore!", detailX, detailY + 390)
+            else
+                love.graphics.setColor(1, 0.3, 0.3)
+                love.graphics.setFont(GameFonts.medium)
+                love.graphics.print("Not enough fuel", detailX, detailY + 390)
+            end
+        else
+            -- Show unlock cost
+            love.graphics.setColor(1, 0.9, 0.3)
+            love.graphics.setFont(GameFonts.large)
+            love.graphics.print("Unlock Cost: " .. sector.unlock_cost .. " gold", detailX, detailY + 320)
+
+            -- Show if can afford
+            if button.canAfford then
+                love.graphics.setColor(0.3, 1, 0.3)
+                love.graphics.setFont(GameFonts.medium)
+                love.graphics.print("Can unlock!", detailX, detailY + 360)
+            else
+                love.graphics.setColor(1, 0.3, 0.3)
+                love.graphics.setFont(GameFonts.medium)
+                love.graphics.print("Not enough gold", detailX, detailY + 360)
+            end
+        end
+    end
+
     -- Draw instructions
     love.graphics.setColor(0.7, 0.7, 0.7)
     love.graphics.setFont(GameFonts.normal)
     love.graphics.printf("[W/S or UP/DOWN] Navigate  [ENTER/SPACE] Select  [U] Upgrades  [R] Refuel  [ESC] Menu", 0,
-        love.graphics.getHeight() - 40, love.graphics.getWidth(), "center")
+        screenHeight - 40, screenWidth, "center")
 end
 
 -- Handle keyboard input
@@ -429,9 +499,10 @@ function MapScreen.mousepressed(x, y, button)
             return
         end
 
-        -- Check sector buttons
-        if hoveredButton and hoveredButton ~= upgradeButton then
-            local btn = hoveredButton
+        -- Check sector buttons (using card-based layout)
+        if hoveredButton and type(hoveredButton) == "number" then
+            local buttonIndex = hoveredButton
+            local btn = sectorButtons[buttonIndex]
 
             if btn.isUnlocked then
                 -- Calculate actual fuel cost with efficiency upgrade
@@ -440,13 +511,8 @@ function MapScreen.mousepressed(x, y, button)
 
                 -- Check if player has enough fuel
                 if player.currency.fuel >= actualFuelCost then
-                    -- Find and store the selected index before leaving
-                    for i, button in ipairs(sectorButtons) do
-                        if button == btn then
-                            lastSelectedIndex = i
-                            break
-                        end
-                    end
+                    -- Store the selected index before leaving
+                    lastSelectedIndex = buttonIndex
                     -- Deduct fuel and start mining
                     Player.purchase(player, 0, actualFuelCost)
                     changeState(gameStates.MINING, btn.sectorId, actualFuelCost)
