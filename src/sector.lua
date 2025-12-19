@@ -124,7 +124,19 @@ Sector.definitions = {
         asteroidTypes = {"titanium_oxides", "rare_earths"},
         spawnRate = 1.0,
         unlock_cost = 700, -- Cost to unlock this sector
-        fuel_cost = 8 -- Fuel cost to travel to this sector
+        fuel_cost = 8, -- Fuel cost to travel to this sector
+        obstacles = {{
+            type = "cosmic_dust",
+            count = 1,
+            spawnInterval = 0,
+            obscurity = 0.8 -- Heavy dust for reduced visibility
+        }, {
+            type = "meteor",
+            count = 4,
+            spawnInterval = 0,
+            speed = 200, -- Faster than Sector 7
+            size = 16 -- Smaller, more dangerous
+        }}
     },
     sector_09 = {
         id = "sector_09",
