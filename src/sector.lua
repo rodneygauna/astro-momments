@@ -38,7 +38,13 @@ Sector.definitions = {
         asteroidTypes = {"magnesium_silicates", "aluminum_minerals"},
         spawnRate = 1.0,
         unlock_cost = 200, -- Cost to unlock this sector
-        fuel_cost = 3 -- Fuel cost to travel to this sector
+        fuel_cost = 3, -- Fuel cost to travel to this sector
+        obstacles = {{
+            type = "cosmic_dust",
+            count = 1,
+            spawnInterval = 0,
+            obscurity = 0.6 -- Mild dust for Sector 3 (0.0 = light, 1.0 = thick)
+        }}
     },
     sector_04 = {
         id = "sector_04",
