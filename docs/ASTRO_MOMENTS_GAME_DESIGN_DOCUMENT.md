@@ -93,10 +93,10 @@ Each sector introduces progressive difficulty through environmental obstacles an
 **Obstacle:** Space Debris (2-3 pieces)
 **Description:** Non-moving space junk floats in the sector. If the player collides with debris, they bounce off and come to a stop. The collision also interrupts asteroid capture progress for one second before it restarts. Players must navigate around obstacles while pursuing asteroids.
 
-### Sector 05: Radiation Belts
+### Sector 05: Combined Hazards
 
-**Obstacle:** Radiation Bands
-**Description:** Slow-moving colored radiation bands drift across the screen. Passing through them temporarily reduces capture speed by 25% for 2-3 seconds. This combines awareness of surroundings (like Sector 04) with a mild time penalty, but isn't instant like debris collision.
+**Obstacle:** Solar Flares + Space Debris
+**Description:** This sector combines two previously encountered obstacles: solar flares that periodically slow both the ship and asteroids, and stationary space debris that causes collision bounces and interrupts capture progress. Players must navigate debris while managing the intermittent solar flare effects, creating a more complex challenge that tests multitasking abilities.
 
 ### Sector 06: Meteor Approach
 

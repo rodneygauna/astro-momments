@@ -126,7 +126,7 @@ Astro Moments features 10 unique sectors, each with escalating challenges and en
 2. **Solar Flare Zones** - Harmless visual cues to teach awareness
 3. **Cosmic Dust Cloud** - Reduced visibility challenge
 4. **Debris Field** - Space junk obstacles that interrupt capture
-5. **Radiation Belts** - Moving bands that reduce capture speed
+5. **Combined Hazards** - Solar flares and space debris together
 6. **Meteor Approach** - Single predictable meteor
 7. **Meteor Shower** - Multiple meteors with varied timing
 8. **Meteor Storm in Nebula** - Combined meteor shower and low visibility
