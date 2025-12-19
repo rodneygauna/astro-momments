@@ -8,7 +8,7 @@ A cozy space mining microgame where every minute counts! Collect as many asteroi
 ![Love2D](https://img.shields.io/badge/LÖVE-11.5-EA316E)
 ![Lua](https://img.shields.io/badge/Lua-5.1-blue)
 
-## 🎮 Game Overview
+## Game Overview
 
 Navigate your tiny spaceship through the depths of space, collecting asteroids with your collection field. The longer an asteroid stays within your field, the closer you are to collecting it! But be careful—asteroids can escape if they leave your radius, and your collection ability changes as you move.
 
@@ -19,16 +19,21 @@ Navigate your tiny spaceship through the depths of space, collecting asteroids w
 3. **Upgrade** - Improve your spaceship's speed, field radius, and collection abilities
 4. **Repeat** - Collect even more asteroids in the next round!
 
-## ✨ Features
+## Features
 
 - **Dynamic Physics-Based Movement** - Realistic spaceship controls with momentum and turning penalties
 - **Collection Meter System** - Progressive asteroid collection with visual feedback
 - **Smart Spawning** - Asteroids spawn dynamically with smooth ease-in animations
 - **Upgrade System** - Enhance your spaceship's capabilities between rounds
+- **Buff Selection** - Choose temporary boosts before each mining session
+- **Progressive Sector System** - 10 unique sectors with escalating challenges
+- **Environmental Obstacles** - From meteor showers to black holes
 - **Circular Play Area** - Navigate within a contained space sector
 - **Camera Follow** - Smooth camera tracking for optimal gameplay
+- **Save/Load System** - Persistent progress across play sessions
+- **Customizable Settings** - Adjust resolution, fullscreen, vsync, and audio volume
 
-## 🕹️ How to Play
+## How to Play
 
 ### Controls
 
@@ -39,12 +44,12 @@ Navigate your tiny spaceship through the depths of space, collecting asteroids w
 
 ### Tips
 
-- Keep asteroids inside your cyan collection field to fill their meter
+- Keep asteroids inside your collection field to fill their meter
 - Sharp turns slow you down—plan your movements!
 - Moving reduces your collection radius, so stop to collect more efficiently
 - Watch the collection meter above each asteroid to track your progress
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -67,7 +72,11 @@ Navigate your tiny spaceship through the depths of space, collecting asteroids w
 
    Or drag the folder onto the LÖVE executable.
 
-## � Save Files
+## Save Files
+
+Your game progress and settings are automatically saved in JSON format, making them human-readable and easy to backup or transfer between systems.
+
+### Player Progress
 
 Your game progress is automatically saved when you:
 
@@ -75,17 +84,28 @@ Your game progress is automatically saved when you:
 - Purchase upgrades
 - Unlock new sectors
 
-### Save File Location
+### Game Settings
 
-Astro Moments uses LÖVE's filesystem, which stores save files in platform-specific directories:
+Your game settings are automatically saved when you:
 
-- **Linux**: `~/.local/share/love/astro-moments/player_save.json`
-- **Windows**: `%APPDATA%/LOVE/astro-moments/player_save.json`
-- **macOS**: `~/Library/Application Support/LOVE/astro-moments/player_save.json`
+- Adjust audio volume or mute music
+- Change resolution or fullscreen mode
+- Toggle vsync
 
-The save file is in JSON format, making it human-readable and easy to backup or transfer between systems.
+### Save File Locations
 
-## �🛠️ Built With
+Astro Moments uses LÖVE's filesystem, which stores files in platform-specific directories:
+
+- **Linux**: `~/.local/share/love/astro-moments/`
+- **Windows**: `%APPDATA%/LOVE/astro-moments/`
+- **macOS**: `~/Library/Application Support/LOVE/astro-moments/`
+
+Files stored:
+
+- `player_save.json` - Player progress, currency, upgrades, and unlocked sectors
+- `settings.json` - Video and audio settings
+
+## Built With
 
 ### Core Technologies
 
@@ -98,7 +118,7 @@ The save file is in JSON format, making it human-readable and easy to backup or 
 - **[HUMP](https://github.com/vrld/hump)** - Camera system and helper utilities
 - **[dkjson](https://github.com/LuaDist/dkjson)** - JSON encoding and decoding
 
-## 🌌 Sector Progression
+## Sector Progression
 
 Astro Moments features 10 unique sectors, each with escalating challenges and environmental obstacles:
 
@@ -115,34 +135,56 @@ Astro Moments features 10 unique sectors, each with escalating challenges and en
 
 The progression creates a balanced difficulty curve, culminating in a boss encounter followed by a peaceful reward sector.
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 astro-moments/
-├── main.lua              # Main game file
+├── main.lua              # Main game file and state management
+├── conf.lua              # LÖVE configuration
+├── src/                  # Core game logic
+│   ├── asteroid.lua     # Asteroid behavior and spawning
+│   ├── buff.lua         # Buff system
+│   ├── player.lua       # Player data management
+│   ├── save.lua         # Save/load system
+│   ├── sector.lua       # Sector definitions
+│   ├── settings.lua     # Game settings
+│   ├── spaceship.lua    # Spaceship physics and controls
+│   └── upgrades.lua     # Upgrade system
+├── screens/              # Game screens
+│   ├── menu_screen.lua
+│   ├── map_screen.lua
+│   ├── mining_screen.lua
+│   ├── buff_selection_screen.lua
+│   ├── cashout_screen.lua
+│   ├── upgrade_screen.lua
+│   ├── settings_screen.lua
+│   └── credits_screen.lua
 ├── libs/                 # External libraries
-│   └── hump/            # Camera and utility library
-├── docs/                # Documentation
-│   ├── MINNOW_MINUTES_GAME_DESIGN_DOCUMENT.md
-│   └── EPICS_AND_USER_STORIES.md
+│   ├── hump/            # Camera and utility library
+│   └── dkjson/          # JSON encoding/decoding
+├── sprites/              # Game graphics
+├── fonts/                # Font files
+├── music/                # Game audio
+├── docs/                 # Documentation
+│   └── ASTRO_MOMENTS_GAME_DESIGN_DOCUMENT.md
 └── README.md            # You are here!
 ```
 
-## 🎨 Game Design
+## Game Design
 
 For detailed game design documentation, see:
 
 - [Game Design Document](docs/ASTRO_MOMENTS_GAME_DESIGN_DOCUMENT.md)
 
-## 🤝 Contributing
+## Contributing
 
 This is a game jam project, but feedback and suggestions are welcome! Feel free to open an issue or reach out.
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **Codedex** - For hosting the 2025 Game Jam
 - **LÖVE Community** - For the amazing game framework
