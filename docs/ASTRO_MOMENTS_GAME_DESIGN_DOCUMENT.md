@@ -69,6 +69,17 @@ Categories:
 - Spawn: more asteroids, rarity chance
 - Time: extra seconds, boost mode, time dilation ability
 
+### 2.7 Obstacle System
+
+Environmental hazards that create progressive difficulty:
+
+- **Solar Flares**: Pulsing warning zones that slow ship and asteroids when active
+- **Cosmic Dust**: Reduces visibility with configurable obscurity levels
+- **Space Debris**: Stationary or moving obstacles causing collision bounce and capture interruption
+- **Meteors**: Fast-moving projectiles that traverse the play area, with staggered spawning for variety
+- **Black Hole**: Boss obstacle with gravitational pull affecting ship and asteroids, instant loss if center is touched
+- **Random Generation**: Sector 10 selects 3-5 random obstacles from the full pool each session
+
 ## 3. Space Sectors
 
 Each sector introduces progressive difficulty through environmental obstacles and mechanics, creating a balanced learning curve that culminates in a boss encounter.
@@ -118,10 +129,10 @@ Each sector introduces progressive difficulty through environmental obstacles an
 **Obstacle:** Black Hole with Gravitational Pull
 **Description:** A slowly moving black hole with gravitational pull that affects both the player and asteroids. Asteroids are pulled toward the black hole and can be lost, but new asteroids continue spawning at normal (or slightly increased) rates. If the player touches the center of the black hole, the mining phase immediately ends and they're taken to the cashout screen, but all collected asteroids are lost (evacuated to escape). This creates risk/reward decisions: pursue asteroids near the black hole or play it safe? Should feel like a boss encounter but not be overly difficult—players should "win" most of the time unless careless.
 
-### Sector 10: Tranquility Zone
+### Sector 10: Chaos Zone
 
-**Obstacle:** None (Reward Level)
-**Description:** The final sector has no obstacles and serves as a cooldown from Sector 09's climax. This is pure reward—a breath of fresh air.
+**Obstacle:** Random Mix (3-5 Hazards)
+**Description:** The ultimate challenge sector where a random selection of 3-5 hazards is chosen from all available obstacle types each mining session. This creates unpredictable and chaotic conditions where no two runs are the same. Players must adapt quickly to whatever combination of solar flares, cosmic dust, space debris, meteors, and even a weakened black hole appears. The randomization keeps veteran players on their toes and provides high replayability.
 
 ## 4. Game Flow
 

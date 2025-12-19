@@ -27,7 +27,8 @@ Navigate your tiny spaceship through the depths of space, collecting asteroids w
 - **Upgrade System** - Enhance your spaceship's capabilities between rounds
 - **Buff Selection** - Choose temporary boosts before each mining session
 - **Progressive Sector System** - 10 unique sectors with escalating challenges
-- **Environmental Obstacles** - From meteor showers to black holes
+- **Environmental Obstacles** - Solar flares, cosmic dust, space debris, meteors, and a black hole boss
+- **Random Obstacle Generation** - Final sector features unpredictable hazard combinations
 - **Circular Play Area** - Navigate within a contained space sector
 - **Camera Follow** - Smooth camera tracking for optimal gameplay
 - **Save/Load System** - Persistent progress across play sessions
@@ -131,9 +132,9 @@ Astro Moments features 10 unique sectors, each with escalating challenges and en
 7. **Meteor Shower** - Multiple meteors with varied timing
 8. **Meteor Storm in Nebula** - Combined meteor shower and low visibility
 9. **Black Hole (Boss)** - Gravitational pull affecting player and asteroids
-10. **Tranquility Zone** - Reward level with no obstacles
+10. **Chaos Zone** - Random mix of 3-5 hazards creating unpredictable challenges
 
-The progression creates a balanced difficulty curve, culminating in a boss encounter followed by a peaceful reward sector.
+The progression creates a balanced difficulty curve, culminating in a boss encounter followed by an ultimate chaos challenge where random obstacles create unpredictable and highly replayable scenarios.
 
 ## Project Structure
 

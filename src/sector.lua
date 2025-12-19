@@ -146,17 +146,62 @@ Sector.definitions = {
         asteroidTypes = {"platinum_group", "gold"},
         spawnRate = 1.0,
         unlock_cost = 800, -- Cost to unlock this sector
-        fuel_cost = 9 -- Fuel cost to travel to this sector
+        fuel_cost = 9, -- Fuel cost to travel to this sector
+        obstacles = {{
+            type = "black_hole",
+            count = 1,
+            spawnInterval = 0,
+            size = 30, -- Visual radius of black hole
+            dangerRadius = 20, -- Instant death zone radius
+            gravityRadius = 240, -- How far gravity reaches
+            gravityStrength = 28, -- Pull force (lower = weaker pull)
+            moveSpeed = 20 -- Movement speed (lower = slower, easier)
+        }}
     },
     sector_10 = {
         id = "sector_10",
         name = "Genesis Cluster",
         description = "The rarest sector in known space. Microdiamonds and organic amino acid asteroids hold mysteries of cosmic origins.",
-        obstacle = "None - Tranquility Zone. A peaceful reward sector with no hazards. Enjoy the bounty!",
+        obstacle = "Chaos Zone - A random mix of 3-5 hazards creates unpredictable mining conditions. Every session is different!",
         asteroidTypes = {"microdiamonds", "amino_acids"},
         spawnRate = 1.0,
         unlock_cost = 900, -- Cost to unlock this sector
-        fuel_cost = 10 -- Fuel cost to travel to this sector
+        fuel_cost = 10, -- Fuel cost to travel to this sector
+        randomObstacles = {
+            enabled = true,
+            minCount = 2, -- Minimum number of random obstacles (adjustable for balance)
+            maxCount = 5, -- Maximum number of random obstacles (adjustable for balance)
+            pool = {{
+                type = "solar_flare",
+                count = 2,
+                spawnInterval = 0
+            }, {
+                type = "cosmic_dust",
+                count = 1,
+                spawnInterval = 0,
+                obscurity = 0.7
+            }, {
+                type = "space_debris",
+                count = 3,
+                spawnInterval = 0,
+                movementSpeed = 0
+            }, {
+                type = "meteor",
+                count = 2,
+                spawnInterval = 0,
+                speed = 180,
+                size = 18
+            }, {
+                type = "black_hole",
+                count = 1,
+                spawnInterval = 0,
+                size = 30,
+                dangerRadius = 20,
+                gravityRadius = 240,
+                gravityStrength = 28,
+                moveSpeed = 20
+            }}
+        }
     }
 }
 

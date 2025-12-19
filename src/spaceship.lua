@@ -153,12 +153,13 @@ function Spaceship.update(spaceship, dt, playableArea)
         spaceship.velocityY = spaceship.velocityY + (targetVelY - spaceship.velocityY) *
                                   math.min(accel / spaceship.maxSpeed, 1)
     else
-        -- Decelerate when no input
-        local decel = spaceship.deceleration * dt
+        -- Decelerate when no input (but only if velocity is above a small threshold)
         local currentVelLength = math.sqrt(spaceship.velocityX * spaceship.velocityX + spaceship.velocityY *
                                                spaceship.velocityY)
 
-        if currentVelLength > 0 then
+        -- Only decelerate if moving faster than 5 units/sec (allows external forces like gravity to work)
+        if currentVelLength > 5 then
+            local decel = spaceship.deceleration * dt
             local decelAmount = math.min(decel, currentVelLength)
             spaceship.velocityX = spaceship.velocityX * (1 - decelAmount / currentVelLength)
             spaceship.velocityY = spaceship.velocityY * (1 - decelAmount / currentVelLength)

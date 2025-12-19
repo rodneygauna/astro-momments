@@ -19,6 +19,7 @@ local baseValue -- Value before multiplier
 local valueMultiplier -- Multiplier from buffs
 local goldMultiplier -- Multiplier from upgrades
 local emergencyPenalty -- Emergency beacon penalty
+local isBlackHoleLoss -- Flag for black hole death
 
 -- Initialize cashout screen
 function CashoutScreen.load(playerData, states, stateChanger, sector, cargo)
@@ -29,6 +30,7 @@ function CashoutScreen.load(playerData, states, stateChanger, sector, cargo)
     cargoUsed = cargo.used
     cargoMax = cargo.max
     hasProcessedReward = false
+    isBlackHoleLoss = cargo.blackHoleLoss or false
 
     -- Process collected materials
     collectedMaterials = {}
@@ -123,30 +125,42 @@ function CashoutScreen.draw()
     love.graphics.setColor(0.5, 0.5, 0.7)
     love.graphics.line(panelX + 50, panelY + 135, panelX + panelWidth - 50, panelY + 135)
 
-    -- Draw materials header
-    love.graphics.setFont(GameFonts.normal)
-    love.graphics.setColor(0.8, 0.8, 0.8)
-    local headerY = panelY + 155
-    love.graphics.printf("Material", panelX + 50, headerY, 200, "left")
-    love.graphics.printf("Qty", panelX + 250, headerY, 80, "center")
-    love.graphics.printf("Value", panelX + 330, headerY, 80, "center")
-    love.graphics.printf("Total", panelX + 410, headerY, 100, "right")
+    -- Show black hole message OR materials list
+    if isBlackHoleLoss then
+        -- Black hole loss message in place of materials list
+        local messageY = panelY + 250
+        love.graphics.setColor(1, 0.2, 0.2)
+        love.graphics.setFont(GameFonts.large)
+        love.graphics.printf("CONSUMED BY BLACK HOLE", panelX, messageY, panelWidth, "center")
+        love.graphics.setColor(0.9, 0.5, 0.5)
+        love.graphics.setFont(GameFonts.medium)
+        love.graphics.printf("All cargo lost!", panelX, messageY + 40, panelWidth, "center")
+    else
+        -- Draw materials header
+        love.graphics.setFont(GameFonts.normal)
+        love.graphics.setColor(0.8, 0.8, 0.8)
+        local headerY = panelY + 155
+        love.graphics.printf("Material", panelX + 50, headerY, 200, "left")
+        love.graphics.printf("Qty", panelX + 250, headerY, 80, "center")
+        love.graphics.printf("Value", panelX + 330, headerY, 80, "center")
+        love.graphics.printf("Total", panelX + 410, headerY, 100, "right")
 
-    -- Draw materials list
-    love.graphics.setColor(1, 1, 1)
-    local currentY = headerY + 30
-    local lineHeight = 25
+        -- Draw materials list
+        love.graphics.setColor(1, 1, 1)
+        local currentY = headerY + 30
+        local lineHeight = 25
 
-    for materialId, data in pairs(collectedMaterials) do
-        -- Format material name (replace underscores with spaces, capitalize first letter)
-        local displayName = materialId:gsub("_", " "):gsub("^%l", string.upper)
+        for materialId, data in pairs(collectedMaterials) do
+            -- Format material name (replace underscores with spaces, capitalize first letter)
+            local displayName = materialId:gsub("_", " "):gsub("^%l", string.upper)
 
-        love.graphics.printf(displayName, panelX + 50, currentY, 200, "left")
-        love.graphics.printf(tostring(data.quantity), panelX + 250, currentY, 80, "center")
-        love.graphics.printf(tostring(data.value), panelX + 330, currentY, 80, "center")
-        love.graphics.printf(tostring(data.total), panelX + 410, currentY, 100, "right")
+            love.graphics.printf(displayName, panelX + 50, currentY, 200, "left")
+            love.graphics.printf(tostring(data.quantity), panelX + 250, currentY, 80, "center")
+            love.graphics.printf(tostring(data.value), panelX + 330, currentY, 80, "center")
+            love.graphics.printf(tostring(data.total), panelX + 410, currentY, 100, "right")
 
-        currentY = currentY + lineHeight
+            currentY = currentY + lineHeight
+        end
     end
 
     -- Draw separator line before total

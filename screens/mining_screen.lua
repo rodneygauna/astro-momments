@@ -288,7 +288,39 @@ function MiningScreen.load(camera, playerData, states, stateChanger, sectorId, f
 
     -- Initialize obstacles based on sector configuration
     obstacles = {}
-    if currentSector.obstacles then
+
+    -- Check for random obstacles configuration
+    if currentSector.randomObstacles and currentSector.randomObstacles.enabled then
+        -- Select random obstacles from the pool
+        local pool = currentSector.randomObstacles.pool
+        local minCount = currentSector.randomObstacles.minCount or 3
+        local maxCount = currentSector.randomObstacles.maxCount or 5
+        local numObstacles = love.math.random(minCount, maxCount)
+
+        -- Shuffle the pool and take the first numObstacles
+        local shuffledPool = {}
+        for i, obstacleConfig in ipairs(pool) do
+            table.insert(shuffledPool, obstacleConfig)
+        end
+
+        -- Fisher-Yates shuffle
+        for i = #shuffledPool, 2, -1 do
+            local j = love.math.random(i)
+            shuffledPool[i], shuffledPool[j] = shuffledPool[j], shuffledPool[i]
+        end
+
+        -- Create the selected obstacles
+        for i = 1, math.min(numObstacles, #shuffledPool) do
+            local obstacleConfig = shuffledPool[i]
+            for j = 1, obstacleConfig.count do
+                local obstacle = Obstacle.create(obstacleConfig, playableArea, obstacles, j)
+                if obstacle then
+                    table.insert(obstacles, obstacle)
+                end
+            end
+        end
+    elseif currentSector.obstacles then
+        -- Normal obstacle initialization
         for _, obstacleConfig in ipairs(currentSector.obstacles) do
             for i = 1, obstacleConfig.count do
                 local obstacle = Obstacle.create(obstacleConfig, playableArea, obstacles, i)
@@ -448,6 +480,44 @@ function MiningScreen.update(dt)
                         spaceship.captureProgress = 0
                         spaceship.targetAsteroid = nil
                     end
+                end
+            end
+        elseif obstacle.type == "black_hole" then
+            -- Check if ship touches the danger zone (center)
+            local shipCenter = {
+                x = spaceship.x + 15,
+                y = spaceship.y + 15
+            }
+            if Obstacle.checkCollision(obstacle, shipCenter) then
+                -- Trigger warning
+                obstacle.warningTimer = 3.0
+
+                -- End mining session - player loses all collected asteroids
+                -- Clear all collected asteroids and cargo
+                spaceship.collectedAsteroids = {}
+                spaceship.currentCargo = 0
+
+                -- Transition to cashout screen with empty cargo
+                changeState(gameStates.CASHOUT, currentSector, {
+                    used = 0,
+                    max = spaceship.maxCargo,
+                    items = {}, -- Empty items
+                    valueMultiplier = 0, -- No value multiplier
+                    blackHoleLoss = true -- Flag to show special message
+                })
+                return
+            end
+
+            -- Check if any asteroids touch the black hole danger zone and remove them
+            for i = #asteroids, 1, -1 do
+                local asteroid = asteroids[i]
+                local asteroidTarget = {
+                    x = asteroid.x,
+                    y = asteroid.y
+                }
+                if Obstacle.checkCollision(obstacle, asteroidTarget) then
+                    -- Remove asteroid that was consumed by black hole
+                    table.remove(asteroids, i)
                 end
             end
         end
