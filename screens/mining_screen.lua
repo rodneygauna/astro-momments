@@ -6,7 +6,7 @@ local Spaceship = require("src/spaceship")
 local Asteroid = require("src/asteroid")
 local Sector = require("src/sector")
 local Buff = require("src/buff")
-local Obstacle = require("src/obstacle")
+local Obstacle = require("src.obstacles.init")
 
 -- Mining state
 local cam
