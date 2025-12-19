@@ -12,6 +12,7 @@ local BuffSelectionScreen = require("screens/buff_selection_screen")
 local UpgradeScreen = require("screens/upgrade_screen")
 local SettingsScreen = require("screens/settings_screen")
 local CreditsScreen = require("screens/credits_screen")
+local ChangelogScreen = require("screens/changelog_screen")
 local cameraFile = require("libs/hump/camera")
 
 -- Global game fonts (will be initialized in love.load() and accessible to all screens)
@@ -38,7 +39,8 @@ local gameStates = {
     PAUSED = "paused",
     GAME_OVER = "game_over",
     SETTINGS = "settings",
-    CREDITS = "credits"
+    CREDITS = "credits",
+    CHANGELOG = "changelog"
 }
 
 -- Function to change game state
@@ -68,6 +70,9 @@ local function changeGameState(newState, ...)
     elseif newState == gameStates.CREDITS then
         CreditsScreen.load(gameStates, changeGameState)
         currentScreen = CreditsScreen
+    elseif newState == gameStates.CHANGELOG then
+        ChangelogScreen.load(gameStates, changeGameState)
+        currentScreen = ChangelogScreen
     elseif newState == gameStates.SKILL_TREE then
         UpgradeScreen.load(player, gameStates, changeGameState)
         currentScreen = UpgradeScreen
@@ -208,5 +213,13 @@ function love.mousemoved(x, y, dx, dy)
     -- Delegate to current screen (for slider dragging in settings)
     if currentScreen and currentScreen.mousemoved then
         currentScreen.mousemoved(x, y, dx, dy)
+    end
+end
+
+-- Love2D wheelmoved function
+function love.wheelmoved(x, y)
+    -- Delegate to current screen (for scrolling)
+    if currentScreen and currentScreen.wheelmoved then
+        currentScreen.wheelmoved(x, y)
     end
 end

@@ -4,6 +4,7 @@ local MenuScreen = {}
 
 local Save = require("src.save")
 local Upgrades = require("src.upgrades")
+local Version = require("src.version")
 
 -- Menu state
 local menu = {}
@@ -12,10 +13,21 @@ local buttonNormalImage
 local buttonHoverImage
 local dialogButtonNormalImage
 local dialogButtonHoverImage
+local versionBadgeNormalImage
+local versionBadgeHoverImage
 local confirmationPromptImage
 local confirmationDialog = {
     visible = false,
     selectedButton = 1 -- 1 = Yes, 2 = No
+}
+
+-- Version badge state
+local versionBadge = {
+    x = 0,
+    y = 0,
+    width = 150,
+    height = 50,
+    hovered = false
 }
 
 -- Helper function: Get menu button Y position
@@ -33,6 +45,13 @@ local function isMouseOverButton(buttonIndex)
 
     return mouseX >= buttonX and mouseX <= buttonX + menu.buttonWidth and mouseY >= buttonY and mouseY <= buttonY +
                menu.buttonHeight
+end
+
+-- Helper function: Check if mouse is over version badge
+local function isMouseOverVersionBadge()
+    local mouseX, mouseY = love.mouse.getPosition()
+    return mouseX >= versionBadge.x and mouseX <= versionBadge.x + versionBadge.width and mouseY >= versionBadge.y and
+               mouseY <= versionBadge.y + versionBadge.height
 end
 
 -- Helper function: Draw a button with generic sprite and text overlay
@@ -118,6 +137,12 @@ function MenuScreen.load(gameStates, changeState)
     dialogButtonNormalImage:setFilter("nearest", "nearest")
     dialogButtonHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_150x50.png")
     dialogButtonHoverImage:setFilter("nearest", "nearest")
+
+    -- Load version badge button images
+    versionBadgeNormalImage = love.graphics.newImage("sprites/buttons/Btn_150x50.png")
+    versionBadgeNormalImage:setFilter("nearest", "nearest")
+    versionBadgeHoverImage = love.graphics.newImage("sprites/buttons/Btn-Hover_150x50.png")
+    versionBadgeHoverImage:setFilter("nearest", "nearest")
 
     -- Load confirmation prompt image
     confirmationPromptImage = love.graphics.newImage("sprites/prompts/ConfirmationPrompt_650x320.png")
@@ -215,6 +240,25 @@ function MenuScreen.draw()
 
         drawButton(button, buttonX, buttonY, isHovered)
     end
+
+    -- Draw version badge in bottom right corner (above controls text)
+    versionBadge.x = love.graphics.getWidth() - versionBadge.width - 20
+    versionBadge.y = love.graphics.getHeight() - versionBadge.height - 70
+    versionBadge.hovered = isMouseOverVersionBadge()
+
+    -- Draw badge button sprite
+    local badgeImage = versionBadge.hovered and versionBadgeHoverImage or versionBadgeNormalImage
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(badgeImage, versionBadge.x, versionBadge.y)
+
+    -- Badge text
+    love.graphics.setFont(GameFonts.small)
+    if versionBadge.hovered then
+        love.graphics.setColor(1, 1, 1)
+    else
+        love.graphics.setColor(0.7, 0.7, 0.7)
+    end
+    love.graphics.printf("v" .. Version.current, versionBadge.x, versionBadge.y + 17, versionBadge.width, "center")
 
     -- Draw controls help
     love.graphics.setColor(0.7, 0.7, 0.7)
@@ -376,6 +420,14 @@ function MenuScreen.mousepressed(x, y, button)
             -- Click outside dialog closes it
             if x < dialogX or x > dialogX + dialogWidth or y < dialogY or y > dialogY + dialogHeight then
                 confirmationDialog.visible = false
+            end
+            return
+        end
+
+        -- Check version badge click
+        if isMouseOverVersionBadge() then
+            if menu.changeState and menu.gameStates then
+                menu.changeState(menu.gameStates.CHANGELOG)
             end
             return
         end
