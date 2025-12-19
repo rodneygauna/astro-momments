@@ -71,17 +71,57 @@ Categories:
 
 ## 3. Space Sectors
 
-### Sector 1: Asteroid Belt
+Each sector introduces progressive difficulty through environmental obstacles and mechanics, creating a balanced learning curve that culminates in a boss encounter.
 
-- Slow, common asteroids.
+### Sector 01: Asteroid Belt
 
-### Sector 2: Debris Field
+**Obstacle:** None
+**Description:** This is the beginner level with no obstacles. Players learn the basic mechanics of movement, asteroid collection, and the collection field system without additional challenges.
 
-- Faster asteroids, more variety.
+### Sector 02: Solar Flare Zones
 
-### Sector 3: Deep Space
+**Obstacle:** Solar Flare Warning Zones
+**Description:** Occasional pulsing warning circles appear briefly before a harmless solar flare effect occurs. The flares don't damage or affect the player negatively—they may even slightly slow asteroids in the area momentarily (actually helpful). This teaches players to watch for visual cues and introduces the concept of environmental effects.
 
-- Rare high-value asteroids.
+### Sector 03: Cosmic Dust Cloud
+
+**Obstacle:** Reduced Visibility
+**Description:** Cosmic dust reduces visibility in the playable area, making it harder to see distant asteroids and navigate. This challenge is purely visual and doesn't mechanically penalize the player, but requires more careful attention to surroundings.
+
+### Sector 04: Debris Field
+
+**Obstacle:** Space Debris (2-3 pieces)
+**Description:** Non-moving space junk floats in the sector. If the player collides with debris, they bounce off and come to a stop. The collision also interrupts asteroid capture progress for one second before it restarts. Players must navigate around obstacles while pursuing asteroids.
+
+### Sector 05: Radiation Belts
+
+**Obstacle:** Radiation Bands
+**Description:** Slow-moving colored radiation bands drift across the screen. Passing through them temporarily reduces capture speed by 25% for 2-3 seconds. This combines awareness of surroundings (like Sector 04) with a mild time penalty, but isn't instant like debris collision.
+
+### Sector 06: Meteor Approach
+
+**Obstacle:** Single Meteor
+**Description:** A meteor periodically flies across the screen in a predictable path (edge to edge). If it collides with the player's ship, they bounce off and come to a stop, interrupting capture progress for one second. Skilled players can learn the pattern and time their movements.
+
+### Sector 07: Meteor Shower
+
+**Obstacle:** Multiple Meteors (2-3)
+**Description:** An increased meteor presence with 2-3 meteors appearing with slightly varied timing. More frequent than Sector 06 but not chaotic. Players need to pay closer attention to their surroundings without feeling overwhelmed.
+
+### Sector 08: Meteor Storm in Nebula
+
+**Obstacle:** Meteor Shower + Reduced Visibility
+**Description:** Combines the meteor shower from Sector 07 with the cosmic dust visibility reduction from Sector 03. This is the final skill check before the boss, requiring players to master both obstacle avoidance and navigation in poor visibility.
+
+### Sector 09: Black Hole (Boss)
+
+**Obstacle:** Black Hole with Gravitational Pull
+**Description:** A slowly moving black hole with gravitational pull that affects both the player and asteroids. Asteroids are pulled toward the black hole and can be lost, but new asteroids continue spawning at normal (or slightly increased) rates. If the player touches the center of the black hole, the mining phase immediately ends and they're taken to the cashout screen, but all collected asteroids are lost (evacuated to escape). This creates risk/reward decisions: pursue asteroids near the black hole or play it safe? Should feel like a boss encounter but not be overly difficult—players should "win" most of the time unless careless.
+
+### Sector 10: Tranquility Zone
+
+**Obstacle:** None (Reward Level)
+**Description:** The final sector has no obstacles and serves as a cooldown from Sector 09's climax. This is pure reward—a breath of fresh air.
 
 ## 4. Game Flow
 

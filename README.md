@@ -98,34 +98,22 @@ The save file is in JSON format, making it human-readable and easy to backup or 
 - **[HUMP](https://github.com/vrld/hump)** - Camera system and helper utilities
 - **[dkjson](https://github.com/LuaDist/dkjson)** - JSON encoding and decoding
 
-## 📋 Development Roadmap
+## 🌌 Sector Progression
 
-### Implemented ✅
+Astro Moments features 10 unique sectors, each with escalating challenges and environmental obstacles:
 
-- [x] Basic spaceship movement with physics
-- [x] Asteroid spawning and behavior
-- [x] Collection field system
-- [x] Progressive collection meter
-- [x] Circular playable area
-- [x] Dynamic spawn animations
-- [x] Camera following
+1. **Asteroid Belt** - Tutorial sector with no obstacles
+2. **Solar Flare Zones** - Harmless visual cues to teach awareness
+3. **Cosmic Dust Cloud** - Reduced visibility challenge
+4. **Debris Field** - Space junk obstacles that interrupt capture
+5. **Radiation Belts** - Moving bands that reduce capture speed
+6. **Meteor Approach** - Single predictable meteor
+7. **Meteor Shower** - Multiple meteors with varied timing
+8. **Meteor Storm in Nebula** - Combined meteor shower and low visibility
+9. **Black Hole (Boss)** - Gravitational pull affecting player and asteroids
+10. **Tranquility Zone** - Reward level with no obstacles
 
-### In Progress 🚧
-
-- [ ] Round timer system
-- [ ] Currency and scoring
-- [ ] Upgrade system
-- [ ] Game state management (menu, gameplay, upgrades)
-
-### Planned 📝
-
-- [ ] Multiple asteroid types and rarities
-- [ ] Sprites and animations
-- [ ] Sound effects and music
-- [x] Save/load functionality
-- [ ] Particle effects
-- [ ] Polish and balancing
-- [ ] Multiple space sectors
+The progression creates a balanced difficulty curve, culminating in a boss encounter followed by a peaceful reward sector.
 
 ## 📁 Project Structure
 
