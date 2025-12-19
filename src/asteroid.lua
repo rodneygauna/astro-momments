@@ -198,8 +198,14 @@ function Asteroid.updateCollection(asteroid, dt, spaceshipCenterX, spaceshipCent
     end
 
     if distance < collectionRadius then
+        -- Apply radiation debuff if active (25% reduction)
+        local captureMultiplier = 1.0
+        if spaceship.radiationDebuff then
+            captureMultiplier = 0.75 -- 25% reduction
+        end
+
         -- Asteroid is in field - increase collection meter
-        asteroid.collectionMeter = asteroid.collectionMeter + effectiveCollectionSpeed * dt
+        asteroid.collectionMeter = asteroid.collectionMeter + effectiveCollectionSpeed * captureMultiplier * dt
         if asteroid.collectionMeter >= 100 then
             asteroid.collectionMeter = 100
             return true -- Asteroid is collected!

@@ -311,6 +311,127 @@ Obstacle.types = {
         end
     },
 
+    radiation_belt = {
+        id = "radiation_belt",
+        name = "Radiation Belt",
+
+        -- Create a new radiation belt instance
+        create = function(playArea, existingObstacles, config)
+            local belt = {
+                type = "radiation_belt",
+                x = playArea.x,
+                y = playArea.y,
+                width = playArea.radius * 2.5, -- Wide enough to cross play area
+                height = 80, -- Height of the radiation band
+                angle = love.math.random() * 2 * math.pi, -- Random direction
+                speed = 15, -- Slow movement speed
+                offset = 0, -- Current position along path
+                color = {love.math.random() * 0.3 + 0.5, -- R: 0.5-0.8
+                love.math.random() * 0.3 + 0.3, -- G: 0.3-0.6
+                love.math.random() * 0.3 + 0.5 -- B: 0.5-0.8
+                },
+                pulseTimer = 0,
+                debuffDuration = 2.5 -- How long the debuff lasts (2-3 seconds average)
+            }
+
+            return belt
+        end,
+
+        -- Update radiation belt
+        update = function(self, dt, asteroids, spaceship, playArea)
+            -- Move belt slowly across the play area
+            self.offset = self.offset + self.speed * dt
+
+            -- Reset offset when belt moves too far (creates looping effect)
+            if self.offset > playArea.radius * 3 then
+                self.offset = -playArea.radius
+            end
+
+            -- Update pulse timer for visual effect
+            self.pulseTimer = self.pulseTimer + dt
+
+            -- Check if spaceship is in the belt
+            local shipCenter = {
+                x = spaceship.x + 15,
+                y = spaceship.y + 15
+            }
+
+            -- Transform target position to belt local space
+            local centerX = self.x + math.cos(self.angle) * self.offset
+            local centerY = self.y + math.sin(self.angle) * self.offset
+            local dx = shipCenter.x - centerX
+            local dy = shipCenter.y - centerY
+
+            -- Rotate point into belt's local coordinate system
+            local cos_rot = math.cos(-self.angle)
+            local sin_rot = math.sin(-self.angle)
+            local localX = dx * cos_rot - dy * sin_rot
+            local localY = dx * sin_rot + dy * cos_rot
+
+            -- Check if within belt bounds
+            local halfWidth = self.width / 2
+            local halfHeight = self.height / 2
+
+            if math.abs(localX) < halfWidth and math.abs(localY) < halfHeight then
+                -- Apply capture speed debuff
+                if not spaceship.radiationDebuff or spaceship.radiationDebuffTimer <= 0 then
+                    spaceship.radiationDebuff = true
+                    spaceship.radiationDebuffTimer = self.debuffDuration
+                end
+            end
+        end,
+
+        -- Draw radiation belt
+        draw = function(self)
+            -- Calculate belt position
+            local centerX = self.x + math.cos(self.angle) * self.offset
+            local centerY = self.y + math.sin(self.angle) * self.offset
+
+            -- Pulsing effect
+            local pulse = 0.6 + 0.4 * math.sin(self.pulseTimer * 2)
+
+            love.graphics.push()
+            love.graphics.translate(centerX, centerY)
+            love.graphics.rotate(self.angle)
+
+            -- Draw multiple layers for depth
+            for i = 1, 3 do
+                local layerOffset = (i - 2) * 15
+                local alpha = pulse * (0.3 + i * 0.1)
+                love.graphics.setColor(self.color[1], self.color[2], self.color[3], alpha)
+                love.graphics
+                    .rectangle("fill", -self.width / 2, -self.height / 2 + layerOffset, self.width, self.height)
+            end
+
+            love.graphics.pop()
+        end,
+
+        -- Check collision with target (rectangle collision)
+        checkCollision = function(self, target)
+            -- Transform target position to belt local space
+            local dx = target.x - (self.x + math.cos(self.angle) * self.offset)
+            local dy = target.y - (self.y + math.sin(self.angle) * self.offset)
+
+            -- Rotate point into belt's local coordinate system
+            local cos_rot = math.cos(-self.angle)
+            local sin_rot = math.sin(-self.angle)
+            local localX = dx * cos_rot - dy * sin_rot
+            local localY = dx * sin_rot + dy * cos_rot
+
+            -- Check if within belt bounds
+            local halfWidth = self.width / 2
+            local halfHeight = self.height / 2
+
+            return math.abs(localX) < halfWidth and math.abs(localY) < halfHeight
+        end,
+
+        -- Get warning message if ship is affected
+        getWarning = function(self)
+            -- No warning - radiation belt is always visible
+            return nil
+        end
+    },
+
     space_debris = {
         id = "space_debris",
         name = "Space Debris",

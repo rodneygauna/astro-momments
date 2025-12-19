@@ -22,6 +22,8 @@ function Spaceship.new(x, y, player)
         velocityY = 0,
         stunned = false,
         stunTimer = 0,
+        radiationDebuff = false,
+        radiationDebuffTimer = 0,
         currentSpeed = 0,
         collectionRadius = baseCollectionRadius,
         baseCollectionRadius = baseCollectionRadius, -- Store base value for resets
@@ -64,6 +66,15 @@ function Spaceship.update(spaceship, dt, playableArea)
         spaceship.x = spaceship.x + spaceship.velocityX * dt
         spaceship.y = spaceship.y + spaceship.velocityY * dt
         return
+    end
+
+    -- Update radiation debuff timer
+    if spaceship.radiationDebuff then
+        spaceship.radiationDebuffTimer = spaceship.radiationDebuffTimer - dt
+        if spaceship.radiationDebuffTimer <= 0 then
+            spaceship.radiationDebuff = false
+            spaceship.radiationDebuffTimer = 0
+        end
     end
 
     -- Get player input direction

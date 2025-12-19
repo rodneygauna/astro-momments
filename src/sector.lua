@@ -66,11 +66,21 @@ Sector.definitions = {
         id = "sector_05",
         name = "Frozen Frontier",
         description = "Ice-laden asteroids glimmer in the void alongside carbonates. Water and mineral wealth await hardy prospectors.",
-        obstacle = "Radiation Belts - Slow-moving colored bands that temporarily reduce capture speed by 25% for 2-3 seconds when passed through.",
+        obstacle = "Combined Hazards - Solar flares and space debris create a dangerous mining environment requiring constant vigilance.",
         asteroidTypes = {"water_ice", "carbonates"},
         spawnRate = 1.0,
         unlock_cost = 400, -- Cost to unlock this sector
-        fuel_cost = 5 -- Fuel cost to travel to this sector
+        fuel_cost = 5, -- Fuel cost to travel to this sector
+        obstacles = {{
+            type = "solar_flare",
+            count = 2,
+            spawnInterval = 0
+        }, {
+            type = "space_debris",
+            count = 2,
+            spawnInterval = 0,
+            movementSpeed = 0
+        }}
     },
     sector_06 = {
         id = "sector_06",
