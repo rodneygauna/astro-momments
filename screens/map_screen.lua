@@ -314,18 +314,27 @@ function MapScreen.draw()
 
         -- Draw description placeholder
         love.graphics.setColor(0.9, 0.9, 0.9)
-        love.graphics.setFont(GameFonts.medium)
+        love.graphics.setFont(GameFonts.small)
         local description = sector.description or "A sector rich with asteroids awaiting discovery."
-        love.graphics.printf(description, detailX, detailY + 70, detailPanelWidth - 40, "left")
+        love.graphics.printf(description, detailX, detailY + 60, detailPanelWidth - 40, "left")
+
+        -- Draw obstacle info
+        love.graphics.setColor(1, 0.6, 0.3)
+        love.graphics.setFont(GameFonts.normal)
+        love.graphics.print("Hazard:", detailX, detailY + 130)
+        love.graphics.setColor(0.9, 0.9, 0.9)
+        love.graphics.setFont(GameFonts.small)
+        local obstacle = sector.obstacle or "Unknown hazards"
+        love.graphics.printf(obstacle, detailX, detailY + 148, detailPanelWidth - 40, "left")
 
         -- Draw asteroid info
         love.graphics.setColor(0.7, 0.7, 1)
         love.graphics.setFont(GameFonts.normal)
-        love.graphics.print("Asteroids Found:", detailX, detailY + 180)
+        love.graphics.print("Asteroids:", detailX, detailY + 220)
 
         -- Display actual asteroid types from sector
         local Asteroid = require("src/asteroid")
-        local yOffset = 210
+        local yOffset = 243
         for i, asteroidTypeId in ipairs(sector.asteroidTypes) do
             -- Find the asteroid type definition
             local asteroidData = nil
@@ -360,11 +369,12 @@ function MapScreen.draw()
 
                 -- Draw asteroid name and value
                 love.graphics.setColor(0.8, 0.8, 0.8)
+                love.graphics.setFont(GameFonts.small)
                 local displayName = asteroidTypeId:gsub("_", " "):gsub("(%a)([%w_']*)", function(first, rest)
                     return first:upper() .. rest:lower()
                 end)
                 love.graphics.print(displayName .. " (" .. asteroidData.value .. "g)", iconX + 15, detailY + yOffset)
-                yOffset = yOffset + 25
+                yOffset = yOffset + 22
             end
         end
 
@@ -376,30 +386,30 @@ function MapScreen.draw()
 
             love.graphics.setColor(0.3, 0.8, 1)
             love.graphics.setFont(GameFonts.large)
-            love.graphics.print("Fuel Cost: " .. actualFuelCost, detailX, detailY + 320)
+            love.graphics.print("Fuel Cost: " .. actualFuelCost, detailX, detailY + 330)
 
             if fuelEfficiency > 0 then
-                love.graphics.setFont(GameFonts.normal)
+                love.graphics.setFont(GameFonts.small)
                 love.graphics.setColor(0.6, 0.6, 0.6)
                 love.graphics.print("(Base: " .. sector.fuel_cost .. " -" .. math.floor(fuelEfficiency * 100) .. "%)",
-                    detailX, detailY + 350)
+                    detailX, detailY + 355)
             end
 
             -- Show if can afford
             if player.currency.fuel >= actualFuelCost then
                 love.graphics.setColor(0.3, 1, 0.3)
                 love.graphics.setFont(GameFonts.medium)
-                love.graphics.print("Ready to explore!", detailX, detailY + 390)
+                love.graphics.print("Ready to explore!", detailX, detailY + 385)
             else
                 love.graphics.setColor(1, 0.3, 0.3)
                 love.graphics.setFont(GameFonts.medium)
-                love.graphics.print("Not enough fuel", detailX, detailY + 390)
+                love.graphics.print("Not enough fuel", detailX, detailY + 385)
             end
         else
             -- Show unlock cost
             love.graphics.setColor(1, 0.9, 0.3)
             love.graphics.setFont(GameFonts.large)
-            love.graphics.print("Unlock Cost: " .. sector.unlock_cost .. " gold", detailX, detailY + 320)
+            love.graphics.print("Unlock Cost: " .. sector.unlock_cost .. " gold", detailX, detailY + 330)
 
             -- Show if can afford
             if button.canAfford then
