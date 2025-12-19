@@ -90,7 +90,14 @@ Sector.definitions = {
         asteroidTypes = {"clay_minerals", "graphite"},
         spawnRate = 1.0,
         unlock_cost = 500, -- Cost to unlock this sector
-        fuel_cost = 6 -- Fuel cost to travel to this sector
+        fuel_cost = 6, -- Fuel cost to travel to this sector
+        obstacles = {{
+            type = "meteor",
+            count = 1,
+            spawnInterval = 0,
+            speed = 150, -- Meteor speed (can increase for later sectors)
+            size = 20 -- Meteor radius (can vary for difficulty)
+        }}
     },
     sector_07 = {
         id = "sector_07",

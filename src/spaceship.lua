@@ -99,6 +99,16 @@ function Spaceship.update(spaceship, dt, playableArea)
         spaceship.isMoving = true
     end
 
+    -- Apply friction only to excessive velocity (from bounces), not normal movement
+    local currentVelMagnitude = math.sqrt(spaceship.velocityX * spaceship.velocityX + spaceship.velocityY *
+                                              spaceship.velocityY)
+    if currentVelMagnitude > spaceship.maxSpeed * 1.5 then
+        -- Strong velocity from bounce - apply friction for gradual slowdown
+        local friction = 0.92
+        spaceship.velocityX = spaceship.velocityX * friction
+        spaceship.velocityY = spaceship.velocityY * friction
+    end
+
     if spaceship.isMoving then
         -- Normalize input direction
         local inputLength = math.sqrt(inputX * inputX + inputY * inputY)
