@@ -54,7 +54,13 @@ Sector.definitions = {
         asteroidTypes = {"calcium_minerals", "sulfides"},
         spawnRate = 1.0,
         unlock_cost = 300, -- Cost to unlock this sector
-        fuel_cost = 4 -- Fuel cost to travel to this sector
+        fuel_cost = 4, -- Fuel cost to travel to this sector
+        obstacles = {{
+            type = "space_debris",
+            count = 3,
+            spawnInterval = 0,
+            movementSpeed = 0 -- Stationary for Sector 4 (can be set to value like 30 for moving debris)
+        }}
     },
     sector_05 = {
         id = "sector_05",

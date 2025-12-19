@@ -362,6 +362,44 @@ function MiningScreen.update(dt)
     for _, obstacle in ipairs(obstacles) do
         Obstacle.update(obstacle, dt, asteroids, spaceship, playableArea)
     end
+
+    -- Check for collisions with space debris
+    for _, obstacle in ipairs(obstacles) do
+        if obstacle.type == "space_debris" then
+            -- Create a collision target with ship's center position
+            local shipCenter = {
+                x = spaceship.x + 15,
+                y = spaceship.y + 15
+            }
+            if Obstacle.checkCollision(obstacle, shipCenter) then
+                -- Calculate bounce direction (away from debris, using center)
+                local dx = shipCenter.x - obstacle.x
+                local dy = shipCenter.y - obstacle.y
+                local distance = math.sqrt(dx * dx + dy * dy)
+
+                if distance > 0 then
+                    -- Normalize and apply bounce
+                    local bounceForce = 200
+                    spaceship.velocityX = (dx / distance) * bounceForce
+                    spaceship.velocityY = (dy / distance) * bounceForce
+
+                    -- Stun spaceship for 1 second
+                    spaceship.stunned = true
+                    spaceship.stunTimer = 1.0
+
+                    -- Trigger warning for 3 seconds
+                    obstacle.warningTimer = 3.0
+
+                    -- Stop capture if in progress
+                    if spaceship.capturing then
+                        spaceship.capturing = false
+                        spaceship.captureProgress = 0
+                        spaceship.targetAsteroid = nil
+                    end
+                end
+            end
+        end
+    end
 end
 
 -- Draw mining screen

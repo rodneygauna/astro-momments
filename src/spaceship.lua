@@ -20,6 +20,8 @@ function Spaceship.new(x, y, player)
         deceleration = baseDeceleration, -- Base deceleration + bonus (same as acceleration)
         velocityX = 0,
         velocityY = 0,
+        stunned = false,
+        stunTimer = 0,
         currentSpeed = 0,
         collectionRadius = baseCollectionRadius,
         baseCollectionRadius = baseCollectionRadius, -- Store base value for resets
@@ -48,6 +50,22 @@ end
 
 -- Update spaceship physics and movement
 function Spaceship.update(spaceship, dt, playableArea)
+    -- Update stun timer
+    if spaceship.stunned then
+        spaceship.stunTimer = spaceship.stunTimer - dt
+        if spaceship.stunTimer <= 0 then
+            spaceship.stunned = false
+            spaceship.stunTimer = 0
+        end
+        -- Slow down while stunned
+        spaceship.velocityX = spaceship.velocityX * 0.9
+        spaceship.velocityY = spaceship.velocityY * 0.9
+        -- Update position but skip input handling
+        spaceship.x = spaceship.x + spaceship.velocityX * dt
+        spaceship.y = spaceship.y + spaceship.velocityY * dt
+        return
+    end
+
     -- Get player input direction
     spaceship.isMoving = false
     local inputX = 0
