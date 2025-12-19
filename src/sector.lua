@@ -107,7 +107,14 @@ Sector.definitions = {
         asteroidTypes = {"chromium_oxides", "cobalt"},
         spawnRate = 1.0,
         unlock_cost = 600, -- Cost to unlock this sector
-        fuel_cost = 7 -- Fuel cost to travel to this sector
+        fuel_cost = 7, -- Fuel cost to travel to this sector
+        obstacles = {{
+            type = "meteor",
+            count = 3,
+            spawnInterval = 0,
+            speed = 180, -- Faster than Sector 6
+            size = 18 -- Slightly smaller, more challenging
+        }}
     },
     sector_08 = {
         id = "sector_08",

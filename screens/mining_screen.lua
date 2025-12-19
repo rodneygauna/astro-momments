@@ -291,7 +291,7 @@ function MiningScreen.load(camera, playerData, states, stateChanger, sectorId, f
     if currentSector.obstacles then
         for _, obstacleConfig in ipairs(currentSector.obstacles) do
             for i = 1, obstacleConfig.count do
-                local obstacle = Obstacle.create(obstacleConfig, playableArea, obstacles)
+                local obstacle = Obstacle.create(obstacleConfig, playableArea, obstacles, i)
                 if obstacle then
                     table.insert(obstacles, obstacle)
                 end
@@ -415,6 +415,25 @@ function MiningScreen.update(dt)
                     local bounceForce = 800
                     spaceship.velocityX = (dx / distance) * bounceForce
                     spaceship.velocityY = (dy / distance) * bounceForce
+
+                    -- Check if bounce would push player outside boundary and clamp if needed
+                    local testX = spaceship.x + spaceship.velocityX * 0.1
+                    local testY = spaceship.y + spaceship.velocityY * 0.1
+                    local testCenterX = testX + 15
+                    local testCenterY = testY + 15
+                    local distFromCenter = math.sqrt(
+                        (testCenterX - playableArea.x) ^ 2 + (testCenterY - playableArea.y) ^ 2)
+
+                    -- If bounce would push outside, reduce bounce force toward center
+                    if distFromCenter > playableArea.radius - 50 then
+                        local toCenterX = playableArea.x - shipCenter.x
+                        local toCenterY = playableArea.y - shipCenter.y
+                        local toCenterDist = math.sqrt(toCenterX * toCenterX + toCenterY * toCenterY)
+                        if toCenterDist > 0 then
+                            spaceship.velocityX = (toCenterX / toCenterDist) * bounceForce * 0.5
+                            spaceship.velocityY = (toCenterY / toCenterDist) * bounceForce * 0.5
+                        end
+                    end
 
                     -- Stun spaceship for 1 second
                     spaceship.stunned = true
