@@ -340,4 +340,10 @@ function UpgradeScreen.mousepressed(x, y, button)
     end
 end
 
+-- Handle mouse wheel scrolling
+function UpgradeScreen.wheelmoved(x, y)
+    local maxScroll = math.max(0, #upgradeList - maxVisibleUpgrades)
+    scrollOffset = math.max(0, math.min(maxScroll, scrollOffset - y))
+end
+
 return UpgradeScreen
