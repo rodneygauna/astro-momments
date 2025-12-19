@@ -19,11 +19,16 @@ Sector.definitions = {
         id = "sector_02",
         name = "Ironclad Belt",
         description = "Dense metallic asteroids drift through this industrial sector. Iron and nickel deposits make this a staple mining route.",
-        obstacle = "Solar Flare Warning Zones - Pulsing warning circles appear before harmless solar flares that may briefly slow nearby asteroids.",
+        obstacle = "Solar Flare Warning Zones - Pulsing warning circles appear before solar flares that briefly slow your ship and nearby asteroids.",
         asteroidTypes = {"iron", "nickel"},
         spawnRate = 1.0,
         unlock_cost = 100, -- Cost to unlock this sector
-        fuel_cost = 2 -- Fuel cost to travel to this sector
+        fuel_cost = 2, -- Fuel cost to travel to this sector
+        obstacles = {{
+            type = "solar_flare",
+            count = 2,
+            spawnInterval = 0
+        }}
     },
     sector_03 = {
         id = "sector_03",

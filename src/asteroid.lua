@@ -146,9 +146,22 @@ function Asteroid.update(asteroid, dt, playableArea)
         asteroid.direction = math.random() * 2 * math.pi
     end
 
-    -- Calculate new position
-    local newX = asteroid.x + math.cos(asteroid.direction) * Asteroid.speed * dt
-    local newY = asteroid.y + math.sin(asteroid.direction) * Asteroid.speed * dt
+    -- Apply speed multiplier if slowed by obstacle
+    local speedMultiplier = asteroid.speedMultiplier or 1.0
+
+    -- Decay the slowdown effect over time
+    if asteroid.slowedTimer and asteroid.slowedTimer > 0 then
+        asteroid.slowedTimer = asteroid.slowedTimer - dt
+        if asteroid.slowedTimer <= 0 then
+            asteroid.speedMultiplier = 1.0
+            asteroid.slowedTimer = nil
+        end
+    end
+
+    -- Calculate new position with speed multiplier
+    local effectiveSpeed = Asteroid.speed * speedMultiplier
+    local newX = asteroid.x + math.cos(asteroid.direction) * effectiveSpeed * dt
+    local newY = asteroid.y + math.sin(asteroid.direction) * effectiveSpeed * dt
     local distanceFromCenter = math.sqrt((newX - playableArea.x) ^ 2 + (newY - playableArea.y) ^ 2)
 
     -- Update position if within bounds, otherwise change direction
@@ -214,7 +227,14 @@ function Asteroid.draw(asteroid)
 
     -- Use material-specific color
     local color = asteroid.asteroidType.color or {0.5, 0.4, 0.3}
-    love.graphics.setColor(color[1], color[2], color[3])
+
+    -- Apply orange tint if slowed by solar flare
+    if asteroid.slowedTimer and asteroid.slowedTimer > 0 then
+        love.graphics.setColor(color[1] * 0.7 + 1.0 * 0.3, -- Mix with orange
+        color[2] * 0.7 + 0.5 * 0.3, color[3] * 0.7)
+    else
+        love.graphics.setColor(color[1], color[2], color[3])
+    end
 
     -- Draw polygon asteroid with spawn scale
     love.graphics.push()

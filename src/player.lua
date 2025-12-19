@@ -8,7 +8,7 @@ function Player.new()
         name = "Captain", -- Player's name
         shipName = "Starfarer", -- Ship's name
         currency = {
-            gold = 0, -- Mining currency earned from collecting asteroids
+            gold = 500000000, -- Mining currency earned from collecting asteroids
             fuel = 5 -- Fuel currency for traveling to sectors/maps
         },
         skills = {

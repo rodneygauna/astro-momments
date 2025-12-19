@@ -6,11 +6,13 @@ local Spaceship = require("src/spaceship")
 local Asteroid = require("src/asteroid")
 local Sector = require("src/sector")
 local Buff = require("src/buff")
+local Obstacle = require("src/obstacle")
 
 -- Mining state
 local cam
 local spaceship
 local asteroids
+local obstacles
 local playableArea
 local timeLeft
 local maxTime
@@ -283,6 +285,19 @@ function MiningScreen.load(camera, playerData, states, stateChanger, sectorId, f
 
     -- Initialize asteroids list
     asteroids = {}
+
+    -- Initialize obstacles based on sector configuration
+    obstacles = {}
+    if currentSector.obstacles then
+        for _, obstacleConfig in ipairs(currentSector.obstacles) do
+            for i = 1, obstacleConfig.count do
+                local obstacle = Obstacle.create(obstacleConfig, playableArea, obstacles)
+                if obstacle then
+                    table.insert(obstacles, obstacle)
+                end
+            end
+        end
+    end
 end
 
 -- Reset mining screen for a new round
@@ -342,6 +357,11 @@ function MiningScreen.update(dt)
 
     -- Update all asteroids
     Asteroid.updateAll(asteroids, dt, playableArea, spaceship, player.stats)
+
+    -- Update obstacles
+    for _, obstacle in ipairs(obstacles) do
+        Obstacle.update(obstacle, dt, asteroids, spaceship, playableArea)
+    end
 end
 
 -- Draw mining screen
@@ -407,6 +427,11 @@ function MiningScreen.draw()
     -- Draw all asteroids
     Asteroid.drawAll(asteroids)
 
+    -- Draw obstacles
+    for _, obstacle in ipairs(obstacles) do
+        Obstacle.draw(obstacle)
+    end
+
     -- Detach camera
     cam:detach()
 
@@ -422,6 +447,38 @@ function MiningScreen.draw()
 
     -- Draw gold (top left)
     love.graphics.print("Gold: " .. player.currency.gold, 10, 10)
+
+    -- Draw obstacle warnings at bottom center
+    if obstacles and #obstacles > 0 then
+        local uniqueWarnings = {}
+        for _, obstacle in ipairs(obstacles) do
+            local warning = Obstacle.getWarning(obstacle)
+            if warning then
+                uniqueWarnings[warning] = true
+            end
+        end
+
+        -- Convert unique warnings to array
+        local warningList = {}
+        for warning, _ in pairs(uniqueWarnings) do
+            table.insert(warningList, warning)
+        end
+
+        if #warningList > 0 then
+            local warningText
+            if #warningList >= 2 then
+                warningText = "WARNING: Systems Overloaded!"
+            else
+                warningText = warningList[1]
+            end
+
+            -- Pulsing effect for warning text (never fully transparent)
+            local pulseAlpha = 0.8 + 0.2 * math.sin(love.timer.getTime() * 4)
+            love.graphics.setColor(1, 0.3, 0.3, pulseAlpha)
+            love.graphics.setFont(GameFonts.large)
+            love.graphics.printf(warningText, 0, love.graphics.getHeight() - 40, love.graphics.getWidth(), "center")
+        end
+    end
 
     -- Draw pause overlay if paused
     if isPaused then
