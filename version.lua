@@ -1,5 +1,33 @@
 -- Version module
 -- Tracks game version and changelog history
+--
+-- HOW TO USE:
+-- 1. When releasing a new version, update Version.current and Version.buildDate
+-- 2. Add a new changelog entry at the TOP of the Version.changelog array
+-- 3. Maintain the structure for each entry:
+--    - version: string matching Version.current (use semantic versioning: MAJOR.MINOR.PATCH)
+--    - date: string in format "Month DD, YYYY"
+--    - type: "major", "minor", or "patch"
+--    - highlights: array of 1-3 key features/changes (shown as bullet points)
+--    - changes: table with three arrays:
+--      * added: new features or content
+--      * fixed: bug fixes
+--      * changed: modifications to existing features
+-- 4. Keep entries user-friendly (not too technical)
+-- 5. Save and the changelog will automatically appear in-game via the version badge
+--
+-- EXAMPLE:
+-- {
+--     version = "0.4.0",
+--     date = "February 1, 2025",
+--     type = "minor",
+--     highlights = {"New asteroid types", "Sound effects system"},
+--     changes = {
+--         added = {"Ruby and diamond asteroids", "Background music and SFX"},
+--         fixed = {"Rare crash in sector transition"},
+--         changed = {"Improved UI responsiveness"}
+--     }
+-- }
 local Version = {}
 
 Version.current = "0.3.0"
