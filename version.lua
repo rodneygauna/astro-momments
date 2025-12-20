@@ -7,12 +7,13 @@
 -- 3. Maintain the structure for each entry:
 --    - version: string matching Version.current (use semantic versioning: MAJOR.MINOR.PATCH)
 --    - date: string in format "Month DD, YYYY"
---    - type: "major", "minor", or "patch"
+--    - type: "major", "minor", or "patch" (currently for documentation only)
 --    - highlights: array of 1-3 key features/changes (shown as bullet points)
---    - changes: table with three arrays:
+--    - changes: table with four arrays:
 --      * added: new features or content
 --      * fixed: bug fixes
 --      * changed: modifications to existing features
+--      * upcoming: (optional) features in development or planned for future updates
 -- 4. Keep entries user-friendly (not too technical)
 -- 5. Save and the changelog will automatically appear in-game via the version badge
 --
@@ -25,7 +26,8 @@
 --     changes = {
 --         added = {"Ruby and diamond asteroids", "Background music and SFX"},
 --         fixed = {"Rare crash in sector transition"},
---         changed = {"Improved UI responsiveness"}
+--         changed = {"Improved UI responsiveness"},
+--         upcoming = {"Boss fight mechanics", "Achievement system"}
 --     }
 -- }
 local Version = {}
@@ -43,7 +45,8 @@ Version.changelog = {{
                  "Visual trails for meteors"},
         fixed = {"Memory leak in cosmic dust particle system", "Frame rate drops in Sector 10"},
         changed = {"Improved rendering performance by 30%",
-                   "Reduced particle count for better frame rates on older systems"}
+                   "Reduced particle count for better frame rates on older systems"},
+        upcoming = {"New buff system for power-ups", "Custom ship skins and colors", "Daily challenge missions"}
     }
 }, {
     version = "0.2.0",

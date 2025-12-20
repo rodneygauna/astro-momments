@@ -41,33 +41,9 @@ local function drawChangelogEntry(entry, startY)
     if entry.highlights and #entry.highlights > 0 then
         love.graphics.setFont(GameFonts.medium)
         for _, highlight in ipairs(entry.highlights) do
-            -- Draw asteroid bullet point (jagged polygon like in-game)
-            local asteroidX = x + 30
-            local asteroidY = startY + 10
-            local baseRadius = 6
-            local numVertices = 7
-            local vertices = {}
-
-            -- Generate jagged vertices
-            for i = 1, numVertices do
-                local angleStep = (2 * math.pi) / numVertices
-                local angle = (i - 1) * angleStep
-                local radiusVariation = baseRadius * (0.7 + ((i * 13) % 10) / 16.0) -- Deterministic variation
-                table.insert(vertices, asteroidX + math.cos(angle) * radiusVariation)
-                table.insert(vertices, asteroidY + math.sin(angle) * radiusVariation)
-            end
-
-            -- Draw filled polygon
-            love.graphics.setColor(0.5, 0.4, 0.3)
-            love.graphics.polygon("fill", vertices)
-
-            -- Draw outline
-            love.graphics.setColor(0.7, 0.6, 0.5)
-            love.graphics.polygon("line", vertices)
-
-            -- Draw highlight text
+            -- Draw bullet point
             love.graphics.setColor(0.8, 0.8, 1)
-            love.graphics.print(highlight, x + 45, startY)
+            love.graphics.print("  • " .. highlight, x + 30, startY)
             startY = startY + lineHeight
         end
         startY = startY + 20
@@ -87,7 +63,7 @@ local function drawChangelogEntry(entry, startY)
             -- Word wrap long items
             local wrappedText, wrappedLines = GameFonts.small:getWrap(item, maxWidth - 60)
             for _, line in ipairs(wrappedLines) do
-                love.graphics.print("  + " .. line, x + 40, startY)
+                love.graphics.print("  • " .. line, x + 40, startY)
                 startY = startY + 25
             end
         end
@@ -129,7 +105,28 @@ local function drawChangelogEntry(entry, startY)
             -- Word wrap long items
             local wrappedText, wrappedLines = GameFonts.small:getWrap(item, maxWidth - 60)
             for _, line in ipairs(wrappedLines) do
-                love.graphics.print("  ~ " .. line, x + 40, startY)
+                love.graphics.print("  • " .. line, x + 40, startY)
+                startY = startY + 25
+            end
+        end
+        startY = startY + 15
+    end
+
+    -- UPCOMING section
+    if entry.changes.upcoming and #entry.changes.upcoming > 0 then
+        love.graphics.setFont(GameFonts.medium)
+        love.graphics.setColor(0.9, 0.7, 1)
+        love.graphics.print("IN DEVELOPMENT:", x + 20, startY)
+        startY = startY + lineHeight
+
+        love.graphics.setFont(GameFonts.small)
+        for _, item in ipairs(entry.changes.upcoming) do
+            love.graphics.setColor(0.9, 0.9, 0.9)
+
+            -- Word wrap long items
+            local wrappedText, wrappedLines = GameFonts.small:getWrap(item, maxWidth - 60)
+            for _, line in ipairs(wrappedLines) do
+                love.graphics.print("  • " .. line, x + 40, startY)
                 startY = startY + 25
             end
         end
