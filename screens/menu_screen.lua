@@ -21,6 +21,18 @@ local confirmationDialog = {
     selectedButton = 1 -- 1 = Yes, 2 = No
 }
 
+-- Animated background elements
+local farStars -- Background star layer
+local nearStars -- Foreground star layer (slowly drifting)
+local planetSprite
+local planetPosition
+local moonSprite
+local moonPosition
+local spaceshipSprite
+local spaceshipPosition
+local spaceshipVelocity
+local starDriftTime = 0 -- Time accumulator for star drift
+
 -- Version badge state
 local versionBadge = {
     x = 0,
@@ -122,10 +134,6 @@ end
 
 -- Initialize menu
 function MenuScreen.load(gameStates, changeState)
-    -- Load background image
-    backgroundImage = love.graphics.newImage("sprites/background/Nebula_God.png")
-    backgroundImage:setFilter("nearest", "nearest") -- Prevents blurriness when scaling
-
     -- Load generic button images
     buttonNormalImage = love.graphics.newImage("sprites/buttons/Btn_380x80.png")
     buttonNormalImage:setFilter("nearest", "nearest")
@@ -147,6 +155,71 @@ function MenuScreen.load(gameStates, changeState)
     -- Load confirmation prompt image
     confirmationPromptImage = love.graphics.newImage("sprites/prompts/ConfirmationPrompt_650x320.png")
     confirmationPromptImage:setFilter("nearest", "nearest")
+
+    -- Load planet and moon sprites
+    planetSprite = love.graphics.newImage("sprites/planets/Planet-Green-Blue.png")
+    planetSprite:setFilter("nearest", "nearest")
+    moonSprite = love.graphics.newImage("sprites/planets/Moon.png")
+    moonSprite:setFilter("nearest", "nearest")
+
+    -- Load spaceship sprite
+    spaceshipSprite = love.graphics.newImage("sprites/ships/Spaceship.png")
+    spaceshipSprite:setFilter("nearest", "nearest")
+
+    -- Position planet (left side of screen)
+    local screenWidth = love.graphics.getWidth()
+    local screenHeight = love.graphics.getHeight()
+    local baseAngle = (math.random() * 0.5 - 0.25) * math.pi -- Limit angle to keep it more centered left
+    local baseDistance = 50 + math.random() * 50 -- Reduced distance for closer positioning
+    planetPosition = {
+        x = screenWidth * 0.15 + math.cos(baseAngle) * baseDistance,
+        y = screenHeight * 0.4 + math.sin(baseAngle) * baseDistance,
+        scale = 1.6 + math.random() * 0.8,
+        rotation = math.random() * 2 * math.pi
+    }
+
+    -- Position moon near planet
+    local moonAngle = math.random() * 2 * math.pi
+    local moonOffset = 150 + math.random() * 100
+    moonPosition = {
+        x = planetPosition.x + math.cos(moonAngle) * moonOffset,
+        y = planetPosition.y + math.sin(moonAngle) * moonOffset,
+        scale = 0.8 + math.random() * 0.4,
+        rotation = math.random() * 2 * math.pi
+    }
+
+    -- Initialize spaceship position and velocity
+    spaceshipPosition = {
+        x = screenWidth * 0.7,
+        y = screenHeight * 0.3,
+        rotation = 0
+    }
+    spaceshipVelocity = {
+        x = 20, -- pixels per second
+        y = 15
+    }
+
+    -- Generate parallax star field
+    farStars = {}
+    for i = 1, 150 do
+        table.insert(farStars, {
+            x = math.random() * screenWidth,
+            y = math.random() * screenHeight,
+            size = 0.5 + math.random() * 1,
+            brightness = 0.3 + math.random() * 0.3
+        })
+    end
+
+    -- Near layer: larger, brighter stars that drift
+    nearStars = {}
+    for i = 1, 80 do
+        table.insert(nearStars, {
+            x = math.random() * screenWidth,
+            y = math.random() * screenHeight,
+            size = 1.5 + math.random() * 1.5,
+            brightness = 0.6 + math.random() * 0.4
+        })
+    end
 
     menu = {}
     menu.buttonHeight = 80
@@ -199,7 +272,44 @@ end
 
 -- Update menu (currently no animation/logic needed)
 function MenuScreen.update(dt)
-    -- Future: Add menu animations, background effects, etc.
+    if not nearStars or not spaceshipPosition then
+        return
+    end
+
+    -- Update star drift time
+    starDriftTime = starDriftTime + dt
+    local driftSpeed = 5 -- pixels per second
+
+    -- Slowly drift near stars
+    for _, star in ipairs(nearStars) do
+        star.x = star.x + driftSpeed * dt
+        -- Wrap around screen
+        if star.x > love.graphics.getWidth() then
+            star.x = 0
+        end
+    end
+
+    -- Update spaceship position
+    local screenWidth = love.graphics.getWidth()
+    local screenHeight = love.graphics.getHeight()
+
+    spaceshipPosition.x = spaceshipPosition.x + spaceshipVelocity.x * dt
+    spaceshipPosition.y = spaceshipPosition.y + spaceshipVelocity.y * dt
+
+    -- Bounce off screen edges with smooth direction changes
+    local margin = 100
+    if spaceshipPosition.x < margin or spaceshipPosition.x > screenWidth - margin then
+        spaceshipVelocity.x = -spaceshipVelocity.x
+        spaceshipPosition.rotation = math.atan2(spaceshipVelocity.y, spaceshipVelocity.x) + math.pi / 2
+    end
+    if spaceshipPosition.y < margin or spaceshipPosition.y > screenHeight - margin then
+        spaceshipVelocity.y = -spaceshipVelocity.y
+        spaceshipPosition.rotation = math.atan2(spaceshipVelocity.y, spaceshipVelocity.x) + math.pi / 2
+    end
+
+    -- Gradually rotate spaceship towards movement direction
+    local targetRotation = math.atan2(spaceshipVelocity.y, spaceshipVelocity.x) + math.pi / 2
+    spaceshipPosition.rotation = spaceshipPosition.rotation + (targetRotation - spaceshipPosition.rotation) * dt * 2
 end
 
 -- Called when entering the menu screen for the first time
@@ -216,12 +326,45 @@ end
 
 -- Draw menu
 function MenuScreen.draw()
-    -- Draw background image (scaled to fit screen)
-    if backgroundImage then
-        local scaleX = love.graphics.getWidth() / backgroundImage:getWidth()
-        local scaleY = love.graphics.getHeight() / backgroundImage:getHeight()
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.draw(backgroundImage, 0, 0, 0, scaleX, scaleY)
+    -- Draw dark space background
+    love.graphics.setColor(0.05, 0.05, 0.1)
+    love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+
+    -- Draw far stars (static)
+    if farStars then
+        for _, star in ipairs(farStars) do
+            love.graphics.setColor(star.brightness, star.brightness, star.brightness + 0.2)
+            love.graphics.circle("fill", star.x, star.y, star.size)
+        end
+    end
+
+    -- Draw planet
+    if planetSprite and planetPosition then
+        love.graphics.setColor(1, 1, 1, 0.7)
+        love.graphics.draw(planetSprite, planetPosition.x, planetPosition.y, planetPosition.rotation,
+            planetPosition.scale, planetPosition.scale, planetSprite:getWidth() / 2, planetSprite:getHeight() / 2)
+    end
+
+    -- Draw moon
+    if moonSprite and moonPosition then
+        love.graphics.setColor(1, 1, 1, 0.6)
+        love.graphics.draw(moonSprite, moonPosition.x, moonPosition.y, moonPosition.rotation, moonPosition.scale,
+            moonPosition.scale, moonSprite:getWidth() / 2, moonSprite:getHeight() / 2)
+    end
+
+    -- Draw near stars (drifting)
+    if nearStars then
+        for _, star in ipairs(nearStars) do
+            love.graphics.setColor(star.brightness, star.brightness, star.brightness + 0.2)
+            love.graphics.circle("fill", star.x, star.y, star.size)
+        end
+    end
+
+    -- Draw spaceship
+    if spaceshipSprite and spaceshipPosition then
+        love.graphics.setColor(1, 1, 1, 0.8)
+        love.graphics.draw(spaceshipSprite, spaceshipPosition.x, spaceshipPosition.y, spaceshipPosition.rotation, 1.5,
+            1.5, spaceshipSprite:getWidth() / 2, spaceshipSprite:getHeight() / 2)
     end
 
     -- Draw title
