@@ -2,7 +2,7 @@
 -- Displays version history and changelog
 local ChangelogScreen = {}
 
-local Version = require("src.version")
+local Version = require("version")
 
 local scrollOffset = 0
 local maxScroll = 0

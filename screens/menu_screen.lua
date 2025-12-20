@@ -4,7 +4,7 @@ local MenuScreen = {}
 
 local Save = require("src.save")
 local Upgrades = require("src.upgrades")
-local Version = require("src.version")
+local Version = require("version")
 
 -- Menu state
 local menu = {}
