@@ -1,4 +1,14 @@
 -- Meteor obstacle module
+local sprite = nil -- Module-level sprite variable
+
+-- Load sprite (called once)
+local function loadSprite()
+    if not sprite then
+        sprite = love.graphics.newImage("sprites/metor/Meteor_40x40.png")
+        sprite:setFilter("nearest", "nearest")
+    end
+end
+
 local Meteor = {
     id = "meteor",
     name = "Meteor",
@@ -130,25 +140,36 @@ local Meteor = {
         end
     end,
 
-    -- Draw meteor (placeholder)
+    -- Draw meteor
     draw = function(self)
         if self.active then
+            -- Load sprite if not already loaded
+            loadSprite()
+
             love.graphics.push()
             love.graphics.translate(self.x, self.y)
             love.graphics.rotate(self.rotation)
 
-            -- Draw rocky meteor shape (irregular circle)
-            love.graphics.setColor(0.5, 0.4, 0.3)
-            love.graphics.circle("fill", 0, 0, self.radius)
+            -- Draw sprite
+            if sprite then
+                love.graphics.setColor(1, 1, 1)
+                -- Scale sprite to match radius (sprite is 40x40, so radius is 20)
+                local scale = (self.radius * 2) / 40
+                love.graphics.draw(sprite, -self.radius, -self.radius, 0, scale, scale)
+            else
+                -- Fallback to placeholder if sprite fails to load
+                love.graphics.setColor(0.5, 0.4, 0.3)
+                love.graphics.circle("fill", 0, 0, self.radius)
 
-            -- Add some crater details
-            love.graphics.setColor(0.4, 0.3, 0.25)
-            love.graphics.circle("fill", -self.radius * 0.3, -self.radius * 0.2, self.radius * 0.3)
-            love.graphics.circle("fill", self.radius * 0.2, self.radius * 0.3, self.radius * 0.25)
+                -- Add some crater details
+                love.graphics.setColor(0.4, 0.3, 0.25)
+                love.graphics.circle("fill", -self.radius * 0.3, -self.radius * 0.2, self.radius * 0.3)
+                love.graphics.circle("fill", self.radius * 0.2, self.radius * 0.3, self.radius * 0.25)
 
-            -- Outline
-            love.graphics.setColor(0.6, 0.5, 0.4)
-            love.graphics.circle("line", 0, 0, self.radius)
+                -- Outline
+                love.graphics.setColor(0.6, 0.5, 0.4)
+                love.graphics.circle("line", 0, 0, self.radius)
+            end
 
             love.graphics.pop()
         end

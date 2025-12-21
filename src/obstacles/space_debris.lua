@@ -1,4 +1,14 @@
 -- Space Debris obstacle module
+local sprite = nil -- Module-level sprite variable
+
+-- Load sprite (called once)
+local function loadSprite()
+    if not sprite then
+        sprite = love.graphics.newImage("sprites/debris/SpaceDebris_40x40.png")
+        sprite:setFilter("nearest", "nearest")
+    end
+end
+
 local SpaceDebris = {
     id = "space_debris",
     name = "Space Debris",
@@ -121,17 +131,26 @@ local SpaceDebris = {
         end
     end,
 
-    -- Draw space debris (placeholder rectangles)
+    -- Draw space debris
     draw = function(self)
+        -- Load sprite if not already loaded
+        loadSprite()
+
         love.graphics.push()
         love.graphics.translate(self.x, self.y)
         love.graphics.rotate(self.rotation)
 
-        -- Draw rectangular debris
-        love.graphics.setColor(0.4, 0.4, 0.45)
-        love.graphics.rectangle("fill", -self.width / 2, -self.height / 2, self.width, self.height)
-        love.graphics.setColor(0.6, 0.6, 0.65)
-        love.graphics.rectangle("line", -self.width / 2, -self.height / 2, self.width, self.height)
+        -- Draw sprite
+        if sprite then
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.draw(sprite, -self.width / 2, -self.height / 2)
+        else
+            -- Fallback to placeholder rectangle if sprite fails to load
+            love.graphics.setColor(0.4, 0.4, 0.45)
+            love.graphics.rectangle("fill", -self.width / 2, -self.height / 2, self.width, self.height)
+            love.graphics.setColor(0.6, 0.6, 0.65)
+            love.graphics.rectangle("line", -self.width / 2, -self.height / 2, self.width, self.height)
+        end
 
         love.graphics.pop()
     end,
